@@ -11,4 +11,9 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+namespace Sylius\PdfGenerationBundle\Renderer;
+
+interface HtmlToPdfRendererInterface
+{
+    public function render(string $html, string $context = 'default'): string;
+}

@@ -11,4 +11,12 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+namespace Sylius\PdfGenerationBundle\Attribute;
+
+#[\Attribute(\Attribute::TARGET_CLASS)]
+final readonly class AsPdfGenerationAdapter
+{
+    public function __construct(public string $key)
+    {
+    }
+}

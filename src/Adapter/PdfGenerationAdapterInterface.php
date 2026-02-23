@@ -11,4 +11,9 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+namespace Sylius\PdfGenerationBundle\Adapter;
+
+interface PdfGenerationAdapterInterface
+{
+    public function generate(string $html): string;
+}
