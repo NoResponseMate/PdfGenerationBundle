@@ -1,0 +1,140 @@
+name: Build
+
+on:
+    push: ~
+    pull_request: ~
+    release:
+        types: [created]
+    schedule:
+        -
+            cron: "0 1 * * 6" # Run at 1am every Saturday
+    workflow_dispatch: ~
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+
+        name: "PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}, ${{ matrix.name }}"
+
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.2", "8.3"]
+                symfony: ["^6.4", "^7.4"]
+                scenario:
+                    - snappy_with_wkhtmltopdf
+                    - snappy_no_wkhtmltopdf
+                    - snappy_unavailable
+                    - dompdf
+                    - dompdf_unavailable
+
+                exclude:
+                    - php: "8.2"
+                      symfony: "^7.4"
+                    - php: "8.3"
+                      symfony: "^6.4"
+
+                include:
+                    - scenario: snappy_with_wkhtmltopdf
+                      name: "Snappy (wkhtmltopdf)"
+                      app_env: test_snappy
+                      install_wkhtmltopdf: true
+                      remove_packages: ""
+
+                    - scenario: snappy_no_wkhtmltopdf
+                      name: "Snappy (no wkhtmltopdf)"
+                      app_env: test_snappy
+                      install_wkhtmltopdf: false
+                      remove_packages: ""
+
+                    - scenario: snappy_unavailable
+                      name: "Snappy (unavailable)"
+                      app_env: test_snappy
+                      install_wkhtmltopdf: false
+                      remove_packages: "knplabs/knp-snappy-bundle"
+
+                    - scenario: dompdf
+                      name: "Dompdf"
+                      app_env: test_dompdf
+                      install_wkhtmltopdf: false
+                      remove_packages: ""
+
+                    - scenario: dompdf_unavailable
+                      name: "Dompdf (unavailable)"
+                      app_env: test_dompdf
+                      install_wkhtmltopdf: false
+                      remove_packages: "dompdf/dompdf"
+
+        env:
+            APP_ENV: ${{ matrix.app_env }}
+
+        steps:
+            -
+                uses: actions/checkout@v4
+
+            -
+                name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+
+            -
+                name: Setup cache for wkhtmltopdf
+                uses: actions/cache@v4
+                id: cache-wkhtmltopdf
+                if: matrix.install_wkhtmltopdf
+                with:
+                    path: /usr/local/bin/wkhtmltopdf
+                    key: wkhtmltopdf-0.12.6.1-2
+
+            -
+                name: Install wkhtmltopdf
+                if: matrix.install_wkhtmltopdf && steps.cache-wkhtmltopdf.outputs.cache-hit != 'true'
+                run: |
+                    sudo apt-get install -y xfonts-base xfonts-75dpi
+                    wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+                    sudo dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+
+            -
+                name: Get Composer cache directory
+                id: composer-cache
+                run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+            -
+                name: Cache Composer
+                uses: actions/cache@v4
+                with:
+                    path: ${{ steps.composer-cache.outputs.dir }}
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-${{ matrix.php }}-composer-
+
+            -
+                name: Restrict Symfony version
+                if: matrix.symfony != ''
+                run: |
+                    composer global config --no-plugins allow-plugins.symfony/flex true
+                    composer global require --no-progress --no-scripts --no-plugins "symfony/flex:^1.10"
+                    composer config extra.symfony.require "${{ matrix.symfony }}"
+
+            -
+                name: Remove packages for matrix variant
+                if: matrix.remove_packages != ''
+                run: composer remove --dev --no-update ${{ matrix.remove_packages }}
+
+            -
+                name: Install PHP dependencies
+                run: composer install --no-interaction --no-scripts
+
+            -
+                name: Run PHPStan
+                run: vendor/bin/phpstan analyse -c phpstan.dist.neon
+
+            -
+                name: Run ECS
+                run: vendor/bin/ecs check
+
+            -
+                name: Run PHPUnit
+                run: vendor/bin/phpunit --colors=always

@@ -1,0 +1,3 @@
+sylius_pdf_generation:
+    default:
+        adapter: dompdf

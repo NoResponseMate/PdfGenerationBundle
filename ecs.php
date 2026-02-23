@@ -14,7 +14,6 @@ declare(strict_types=1);
 use PhpCsFixer\Fixer\ClassNotation\OrderedTypesFixer;
 use PhpCsFixer\Fixer\Comment\HeaderCommentFixer;
 use PhpCsFixer\Fixer\FunctionNotation\NullableTypeDeclarationForDefaultNullValueFixer;
-use PhpCsFixer\Fixer\Phpdoc\PhpdocSeparationFixer;
 use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 
@@ -27,6 +26,7 @@ return static function (ECSConfig $config): void {
         InlineDocCommentDeclarationSniff::class . '.MissingVariable',
         InlineDocCommentDeclarationSniff::class . '.NoAssignment',
         '**/var/*',
+        'tests/Application/**',
     ]);
     $config->ruleWithConfiguration(OrderedTypesFixer::class, ['null_adjustment' => 'always_last']);
     $config->ruleWithConfiguration(NullableTypeDeclarationForDefaultNullValueFixer::class, ['use_nullable_type_declaration' => true]);
