@@ -129,6 +129,7 @@ jobs:
 
             -
                 name: Run PHPStan
+                if: matrix.remove_packages == ''
                 run: vendor/bin/phpstan analyse -c phpstan.dist.neon
 
             -

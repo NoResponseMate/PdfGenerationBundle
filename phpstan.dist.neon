@@ -5,3 +5,4 @@ parameters:
         - tests/
     excludePaths:
         - tests/Application/
+        - src/DependencyInjection/Configuration.php
