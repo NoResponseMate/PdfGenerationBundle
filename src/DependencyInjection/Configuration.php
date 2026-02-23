@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfGenerationBundle\DependencyInjection;
+namespace Sylius\PdfBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -21,7 +21,7 @@ final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('sylius_pdf_generation');
+        $treeBuilder = new TreeBuilder('sylius_pdf');
         $rootNode = $treeBuilder->getRootNode();
 
         $rootNode

@@ -11,22 +11,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Functional;
+namespace Tests\Sylius\PdfBundle\Functional;
 
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\Adapter\DompdfAdapter;
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfGenerationBundle\DependencyInjection\SyliusPdfGenerationExtension;
-use Sylius\PdfGenerationBundle\Renderer\HtmlToPdfRendererInterface;
-use Sylius\PdfGenerationBundle\SyliusPdfGenerationBundle;
+use Sylius\PdfBundle\Adapter\DompdfAdapter;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
+use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Tests\Sylius\PdfGenerationBundle\Functional\Stub\StubCustomAdapter;
+use Tests\Sylius\PdfBundle\Functional\Stub\StubCustomAdapter;
 use Twig\Environment;
 
 final class CustomAdapterRegistrationTest extends TestCase
@@ -45,13 +45,13 @@ final class CustomAdapterRegistrationTest extends TestCase
 
         self::assertTrue($container->hasAlias(PdfGenerationAdapterInterface::class));
         self::assertSame(
-            'sylius_pdf_generation.adapter.default',
+            'sylius_pdf.adapter.default',
             (string) $container->getAlias(PdfGenerationAdapterInterface::class),
         );
 
         self::assertInstanceOf(
             DompdfAdapter::class,
-            $container->get('sylius_pdf_generation.adapter.invoice'),
+            $container->get('sylius_pdf.adapter.invoice'),
         );
     }
 
@@ -66,14 +66,14 @@ final class CustomAdapterRegistrationTest extends TestCase
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);
-        $stubDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'stub_custom']);
+        $stubDefinition->addTag('sylius_pdf.adapter', ['key' => 'stub_custom']);
         $stubDefinition->setPublic(true);
         $container->setDefinition(StubCustomAdapter::class, $stubDefinition);
 
         $container->compile();
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         self::assertSame('STUB:<p>test</p>', $renderer->render('<p>test</p>', 'invoice'));
     }
 
@@ -85,7 +85,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);
-        $stubDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'stub_custom']);
+        $stubDefinition->addTag('sylius_pdf.adapter', ['key' => 'stub_custom']);
         $stubDefinition->setPublic(true);
         $container->setDefinition(StubCustomAdapter::class, $stubDefinition);
 
@@ -98,7 +98,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         );
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         self::assertSame('STUB:<p>test</p>', $renderer->render('<p>test</p>'));
     }
 
@@ -114,7 +114,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);
-        $stubDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'stub_custom']);
+        $stubDefinition->addTag('sylius_pdf.adapter', ['key' => 'stub_custom']);
         $stubDefinition->setPublic(true);
         $container->setDefinition(StubCustomAdapter::class, $stubDefinition);
 
@@ -122,11 +122,11 @@ final class CustomAdapterRegistrationTest extends TestCase
 
         self::assertInstanceOf(
             DompdfAdapter::class,
-            $container->get('sylius_pdf_generation.adapter.coupon'),
+            $container->get('sylius_pdf.adapter.coupon'),
         );
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         self::assertSame('STUB:<p>invoice</p>', $renderer->render('<p>invoice</p>', 'invoice'));
     }
 
@@ -148,7 +148,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         $container->compile();
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         self::assertSame('STUB:<p>test</p>', $renderer->render('<p>test</p>', 'invoice'));
     }
 
@@ -176,13 +176,13 @@ final class CustomAdapterRegistrationTest extends TestCase
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);
-        $stubDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'stub_custom']);
+        $stubDefinition->addTag('sylius_pdf.adapter', ['key' => 'stub_custom']);
         $container->setDefinition(StubCustomAdapter::class, $stubDefinition);
 
         $container->compile();
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
 
         self::assertSame('STUB:<h1>Hello</h1>', $renderer->render('<h1>Hello</h1>'));
     }
@@ -209,23 +209,23 @@ final class CustomAdapterRegistrationTest extends TestCase
         $twigDefinition->setSynthetic(true);
         $container->setDefinition('twig', $twigDefinition);
 
-        $bundle = new SyliusPdfGenerationBundle();
+        $bundle = new SyliusPdfBundle();
         $bundle->build($container);
 
-        $extension = new SyliusPdfGenerationExtension();
+        $extension = new SyliusPdfExtension();
         $extension->load([$config], $container);
 
-        $container->getDefinition('sylius_pdf_generation.renderer.html')->setPublic(true);
+        $container->getDefinition('sylius_pdf.renderer.html')->setPublic(true);
 
-        if ($container->hasDefinition('sylius_pdf_generation.adapter.default')) {
-            $container->getDefinition('sylius_pdf_generation.adapter.default')->setPublic(true);
+        if ($container->hasDefinition('sylius_pdf.adapter.default')) {
+            $container->getDefinition('sylius_pdf.adapter.default')->setPublic(true);
         }
 
         /** @var array<string, array<string, mixed>> $contexts */
         $contexts = $config['contexts'] ?? [];
 
         foreach ($contexts as $contextName => $contextConfig) {
-            $serviceId = sprintf('sylius_pdf_generation.adapter.%s', (string) $contextName);
+            $serviceId = sprintf('sylius_pdf.adapter.%s', (string) $contextName);
             if ($container->hasDefinition($serviceId)) {
                 $container->getDefinition($serviceId)->setPublic(true);
             }

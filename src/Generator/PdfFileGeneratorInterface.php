@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfGenerationBundle\Generator;
+namespace Sylius\PdfBundle\Generator;
 
-use Sylius\PdfGenerationBundle\Model\PdfFile;
+use Sylius\PdfBundle\Model\PdfFile;
 
 interface PdfFileGeneratorInterface
 {

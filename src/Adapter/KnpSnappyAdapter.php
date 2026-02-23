@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfGenerationBundle\Adapter;
+namespace Sylius\PdfBundle\Adapter;
 
 use Knp\Snappy\GeneratorInterface;
 use Symfony\Component\Config\FileLocatorInterface;

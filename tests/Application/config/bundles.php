@@ -12,12 +12,12 @@
 declare(strict_types=1);
 
 use Knp\Bundle\SnappyBundle\KnpSnappyBundle;
-use Sylius\PdfGenerationBundle\SyliusPdfGenerationBundle;
+use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 
 $bundles = [
     FrameworkBundle::class => ['all' => true],
-    SyliusPdfGenerationBundle::class => ['all' => true],
+    SyliusPdfBundle::class => ['all' => true],
 ];
 
 if (class_exists(KnpSnappyBundle::class)) {

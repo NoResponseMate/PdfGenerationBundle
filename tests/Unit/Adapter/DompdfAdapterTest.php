@@ -11,12 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Unit\Adapter;
+namespace Tests\Sylius\PdfBundle\Unit\Adapter;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\Adapter\DompdfAdapter;
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Adapter\DompdfAdapter;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 
 final class DompdfAdapterTest extends TestCase
 {

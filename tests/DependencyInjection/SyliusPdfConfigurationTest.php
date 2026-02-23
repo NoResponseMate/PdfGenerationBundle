@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection;
+namespace Tests\Sylius\PdfBundle\DependencyInjection;
 
 use Matthias\SymfonyConfigTest\PhpUnit\ConfigurationTestCaseTrait;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\DependencyInjection\Configuration;
+use Sylius\PdfBundle\DependencyInjection\Configuration;
 
-final class SyliusPdfGenerationConfigurationTest extends TestCase
+final class SyliusPdfConfigurationTest extends TestCase
 {
     use ConfigurationTestCaseTrait;
 

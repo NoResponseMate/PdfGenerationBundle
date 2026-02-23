@@ -11,22 +11,22 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection;
+namespace Tests\Sylius\PdfBundle\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Sylius\PdfGenerationBundle\Adapter\DompdfAdapter;
-use Sylius\PdfGenerationBundle\Adapter\KnpSnappyAdapter;
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfGenerationBundle\DependencyInjection\SyliusPdfGenerationExtension;
-use Sylius\PdfGenerationBundle\Manager\FilesystemPdfFileManager;
-use Sylius\PdfGenerationBundle\Manager\PdfFileManagerInterface;
-use Sylius\PdfGenerationBundle\Renderer\HtmlToPdfRenderer;
-use Sylius\PdfGenerationBundle\Renderer\HtmlToPdfRendererInterface;
-use Sylius\PdfGenerationBundle\Renderer\TwigToPdfRenderer;
-use Sylius\PdfGenerationBundle\Renderer\TwigToPdfRendererInterface;
+use Sylius\PdfBundle\Adapter\DompdfAdapter;
+use Sylius\PdfBundle\Adapter\KnpSnappyAdapter;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
+use Sylius\PdfBundle\Manager\FilesystemPdfFileManager;
+use Sylius\PdfBundle\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Renderer\HtmlToPdfRenderer;
+use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\Renderer\TwigToPdfRenderer;
+use Sylius\PdfBundle\Renderer\TwigToPdfRendererInterface;
 
-final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
+final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 {
     #[Test]
     public function it_registers_default_adapter_service(): void
@@ -34,7 +34,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.default',
+            'sylius_pdf.adapter.default',
             KnpSnappyAdapter::class,
         );
     }
@@ -46,7 +46,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasAlias(
             PdfGenerationAdapterInterface::class,
-            'sylius_pdf_generation.adapter.default',
+            'sylius_pdf.adapter.default',
         );
     }
 
@@ -56,7 +56,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.renderer.html',
+            'sylius_pdf.renderer.html',
             HtmlToPdfRenderer::class,
         );
     }
@@ -68,7 +68,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasAlias(
             HtmlToPdfRendererInterface::class,
-            'sylius_pdf_generation.renderer.html',
+            'sylius_pdf.renderer.html',
         );
     }
 
@@ -83,12 +83,12 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.invoice',
+            'sylius_pdf.adapter.invoice',
             DompdfAdapter::class,
         );
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.coupon',
+            'sylius_pdf.adapter.coupon',
             DompdfAdapter::class,
         );
     }
@@ -101,7 +101,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.default',
+            'sylius_pdf.adapter.default',
             DompdfAdapter::class,
         );
     }
@@ -112,7 +112,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.pdf_files_directory',
+            'sylius_pdf.pdf_files_directory',
             '%kernel.project_dir%/private/pdf',
         );
     }
@@ -123,7 +123,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load(['pdf_files_directory' => '/custom/path']);
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.pdf_files_directory',
+            'sylius_pdf.pdf_files_directory',
             '/custom/path',
         );
     }
@@ -134,7 +134,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.manager.filesystem',
+            'sylius_pdf.manager.filesystem',
             FilesystemPdfFileManager::class,
         );
     }
@@ -146,7 +146,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasAlias(
             PdfFileManagerInterface::class,
-            'sylius_pdf_generation.manager',
+            'sylius_pdf.manager',
         );
     }
 
@@ -156,7 +156,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.renderer.twig',
+            'sylius_pdf.renderer.twig',
             TwigToPdfRenderer::class,
         );
     }
@@ -168,7 +168,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasAlias(
             TwigToPdfRendererInterface::class,
-            'sylius_pdf_generation.renderer.twig',
+            'sylius_pdf.renderer.twig',
         );
     }
 
@@ -181,10 +181,10 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        self::assertTrue($this->container->hasParameter('sylius_pdf_generation.deferred_adapter_contexts'));
+        self::assertTrue($this->container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
 
         /** @var array<string, string> $deferred */
-        $deferred = $this->container->getParameter('sylius_pdf_generation.deferred_adapter_contexts');
+        $deferred = $this->container->getParameter('sylius_pdf.deferred_adapter_contexts');
         self::assertSame(['invoice' => 'my_custom'], $deferred);
     }
 
@@ -210,19 +210,19 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.default',
+            'sylius_pdf.adapter.default',
             KnpSnappyAdapter::class,
         );
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf_generation.adapter.coupon',
+            'sylius_pdf.adapter.coupon',
             DompdfAdapter::class,
         );
 
-        self::assertFalse($this->container->hasDefinition('sylius_pdf_generation.adapter.invoice'));
+        self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.invoice'));
 
         /** @var array<string, string> $deferred */
-        $deferred = $this->container->getParameter('sylius_pdf_generation.deferred_adapter_contexts');
+        $deferred = $this->container->getParameter('sylius_pdf.deferred_adapter_contexts');
         self::assertSame(['invoice' => 'my_custom'], $deferred);
     }
 
@@ -232,7 +232,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         $this->load();
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.context_pdf_files_directories',
+            'sylius_pdf.context_pdf_files_directories',
             ['default' => '%kernel.project_dir%/private/pdf'],
         );
     }
@@ -248,7 +248,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        $managerDefinition = $this->container->getDefinition('sylius_pdf_generation.manager.filesystem');
+        $managerDefinition = $this->container->getDefinition('sylius_pdf.manager.filesystem');
         self::assertSame([
             'default' => '/root/pdf',
             'invoice' => '/custom/invoices',
@@ -267,7 +267,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.context_pdf_files_directories',
+            'sylius_pdf.context_pdf_files_directories',
             ['default' => '/root/pdf', 'coupon' => '/root/pdf'],
         );
     }
@@ -283,7 +283,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.context_pdf_files_directories',
+            'sylius_pdf.context_pdf_files_directories',
             ['default' => '/root/pdf', 'invoice' => '/custom/invoices'],
         );
     }
@@ -297,7 +297,7 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
         ]);
 
         $this->assertContainerBuilderHasParameter(
-            'sylius_pdf_generation.context_pdf_files_directories',
+            'sylius_pdf.context_pdf_files_directories',
             ['default' => '/custom/default'],
         );
     }
@@ -312,11 +312,11 @@ final class SyliusPdfGenerationExtensionTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        self::assertFalse($this->container->hasParameter('sylius_pdf_generation.deferred_adapter_contexts'));
+        self::assertFalse($this->container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
     }
 
     protected function getContainerExtensions(): array
     {
-        return [new SyliusPdfGenerationExtension()];
+        return [new SyliusPdfExtension()];
     }
 }

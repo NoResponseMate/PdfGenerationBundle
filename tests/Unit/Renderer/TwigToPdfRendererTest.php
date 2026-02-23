@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Unit\Renderer;
+namespace Tests\Sylius\PdfBundle\Unit\Renderer;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\Renderer\HtmlToPdfRendererInterface;
-use Sylius\PdfGenerationBundle\Renderer\TwigToPdfRenderer;
-use Sylius\PdfGenerationBundle\Renderer\TwigToPdfRendererInterface;
+use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\Renderer\TwigToPdfRenderer;
+use Sylius\PdfBundle\Renderer\TwigToPdfRendererInterface;
 use Twig\Environment;
 
 final class TwigToPdfRendererTest extends TestCase

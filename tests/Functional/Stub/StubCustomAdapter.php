@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Functional\Stub;
+namespace Tests\Sylius\PdfBundle\Functional\Stub;
 
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfGenerationBundle\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Attribute\AsPdfGenerationAdapter;
 
 #[AsPdfGenerationAdapter('stub_custom')]
 final class StubCustomAdapter implements PdfGenerationAdapterInterface

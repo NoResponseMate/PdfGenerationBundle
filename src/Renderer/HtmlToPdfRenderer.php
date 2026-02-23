@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfGenerationBundle\Renderer;
+namespace Sylius\PdfBundle\Renderer;
 
 use Psr\Container\ContainerInterface;
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 
 final class HtmlToPdfRenderer implements HtmlToPdfRendererInterface
 {

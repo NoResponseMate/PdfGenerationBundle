@@ -8,7 +8,7 @@
          cacheDirectory=".phpunit.cache"
 >
     <testsuites>
-        <testsuite name="SyliusPdfGenerationBundle Test Suite">
+        <testsuite name="SyliusPdfBundle Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

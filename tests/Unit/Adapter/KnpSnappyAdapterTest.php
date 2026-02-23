@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Unit\Adapter;
+namespace Tests\Sylius\PdfBundle\Unit\Adapter;
 
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\Adapter\KnpSnappyAdapter;
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Adapter\KnpSnappyAdapter;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 use Symfony\Component\Config\FileLocatorInterface;
 
 final class KnpSnappyAdapterTest extends TestCase

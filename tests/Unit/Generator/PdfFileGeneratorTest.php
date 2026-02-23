@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Unit\Generator;
+namespace Tests\Sylius\PdfBundle\Unit\Generator;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\Generator\PdfFileGenerator;
-use Sylius\PdfGenerationBundle\Generator\PdfFileGeneratorInterface;
-use Sylius\PdfGenerationBundle\Manager\PdfFileManagerInterface;
-use Sylius\PdfGenerationBundle\Model\PdfFile;
+use Sylius\PdfBundle\Generator\PdfFileGenerator;
+use Sylius\PdfBundle\Generator\PdfFileGeneratorInterface;
+use Sylius\PdfBundle\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Model\PdfFile;
 
 final class PdfFileGeneratorTest extends TestCase
 {

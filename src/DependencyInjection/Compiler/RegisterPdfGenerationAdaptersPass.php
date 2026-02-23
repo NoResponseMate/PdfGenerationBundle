@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
+namespace Sylius\PdfBundle\DependencyInjection\Compiler;
 
-use Sylius\PdfGenerationBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -23,17 +23,17 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasParameter('sylius_pdf_generation.deferred_adapter_contexts')) {
+        if (!$container->hasParameter('sylius_pdf.deferred_adapter_contexts')) {
             return;
         }
 
         /** @var array<string, string> $deferredContexts */
-        $deferredContexts = $container->getParameter('sylius_pdf_generation.deferred_adapter_contexts');
+        $deferredContexts = $container->getParameter('sylius_pdf.deferred_adapter_contexts');
 
-        $taggedServices = $container->findTaggedServiceIds('sylius_pdf_generation.adapter');
+        $taggedServices = $container->findTaggedServiceIds('sylius_pdf.adapter');
         $adapterMap = $this->buildAdapterMap($taggedServices);
 
-        $rendererDefinition = $container->getDefinition('sylius_pdf_generation.renderer.html');
+        $rendererDefinition = $container->getDefinition('sylius_pdf.renderer.html');
 
         /** @var ServiceLocatorArgument $locatorArgument */
         $locatorArgument = $rendererDefinition->getArgument(0);
@@ -43,7 +43,7 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
             if (!isset($adapterMap[$adapterKey])) {
                 throw new \InvalidArgumentException(sprintf(
                     'The PDF generation adapter "%s" used in context "%s" is not registered. ' .
-                    'Did you forget to tag your service with "sylius_pdf_generation.adapter" ' .
+                    'Did you forget to tag your service with "sylius_pdf.adapter" ' .
                     'or use the #[AsPdfGenerationAdapter] attribute?',
                     $adapterKey,
                     $contextName,
@@ -62,7 +62,7 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
             );
         }
 
-        $container->getParameterBag()->remove('sylius_pdf_generation.deferred_adapter_contexts');
+        $container->getParameterBag()->remove('sylius_pdf.deferred_adapter_contexts');
     }
 
     /**
@@ -78,7 +78,7 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
             foreach ($tags as $attributes) {
                 if (!isset($attributes['key']) || !is_string($attributes['key']) || '' === $attributes['key']) {
                     throw new \InvalidArgumentException(sprintf(
-                        'The service "%s" tagged with "sylius_pdf_generation.adapter" must have a "key" attribute.',
+                        'The service "%s" tagged with "sylius_pdf.adapter" must have a "key" attribute.',
                         $serviceId,
                     ));
                 }

@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfGenerationBundle\Functional;
+namespace Tests\Sylius\PdfBundle\Functional;
 
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfGenerationBundle\DependencyInjection\SyliusPdfGenerationExtension;
-use Sylius\PdfGenerationBundle\Renderer\HtmlToPdfRendererInterface;
-use Sylius\PdfGenerationBundle\SyliusPdfGenerationBundle;
+use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
+use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -34,7 +34,7 @@ final class DompdfAdapterTest extends TestCase
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         $result = $renderer->render('<html><body><h1>Hello</h1></body></html>');
 
         self::assertStringStartsWith('%PDF-', $result);
@@ -51,7 +51,7 @@ final class DompdfAdapterTest extends TestCase
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         $result = $renderer->render('<html><body><p>Invoice</p></body></html>', 'invoice');
 
         self::assertStringStartsWith('%PDF-', $result);
@@ -65,7 +65,7 @@ final class DompdfAdapterTest extends TestCase
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
         $result = $renderer->render('<html><body><p>A4 document</p></body></html>');
 
         self::assertStringStartsWith('%PDF-', $result);
@@ -79,7 +79,7 @@ final class DompdfAdapterTest extends TestCase
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
 
         $first = $renderer->render('<html><body>First</body></html>');
         $second = $renderer->render('<html><body>Second</body></html>');
@@ -100,7 +100,7 @@ final class DompdfAdapterTest extends TestCase
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf_generation.renderer.html');
+        $renderer = $container->get('sylius_pdf.renderer.html');
 
         $defaultResult = $renderer->render('<html><body>Default</body></html>');
         $invoiceResult = $renderer->render('<html><body>Invoice</body></html>', 'invoice');
@@ -131,13 +131,13 @@ final class DompdfAdapterTest extends TestCase
         $twigDefinition->setSynthetic(true);
         $container->setDefinition('twig', $twigDefinition);
 
-        $bundle = new SyliusPdfGenerationBundle();
+        $bundle = new SyliusPdfBundle();
         $bundle->build($container);
 
-        $extension = new SyliusPdfGenerationExtension();
+        $extension = new SyliusPdfExtension();
         $extension->load([$config], $container);
 
-        $container->getDefinition('sylius_pdf_generation.renderer.html')->setPublic(true);
+        $container->getDefinition('sylius_pdf.renderer.html')->setPublic(true);
 
         $container->compile();
 
