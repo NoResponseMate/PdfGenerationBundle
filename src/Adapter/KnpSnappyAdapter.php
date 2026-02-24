@@ -14,50 +14,24 @@ declare(strict_types=1);
 namespace Sylius\PdfBundle\Adapter;
 
 use Knp\Snappy\GeneratorInterface;
-use Symfony\Component\Config\FileLocatorInterface;
+use Sylius\PdfBundle\Factory\GeneratorFactoryInterface;
 
 final class KnpSnappyAdapter implements PdfGenerationAdapterInterface
 {
-    /**
-     * @param array<string, mixed> $knpSnappyOptions
-     * @param array<string, mixed> $options
-     */
+    /** @param array<string, mixed> $options */
     public function __construct(
-        private readonly FileLocatorInterface $fileLocator,
-        private readonly GeneratorInterface $snappy,
-        private readonly array $knpSnappyOptions = [],
-        private readonly array $options = [],
+        private readonly GeneratorFactoryInterface $factory,
+        private readonly array $options,
+        private readonly string $context,
     ) {
     }
 
     public function generate(string $html): string
     {
-        return $this->snappy->getOutputFromHtml($html, $this->resolveOptions());
-    }
+        /** @var GeneratorInterface $generator */
+        $generator = $this->factory->createGenerator($this->options, $this->context);
+        $resolvedOptions = $this->factory->resolveOptions($this->options);
 
-    /** @return array<string, mixed> */
-    private function resolveOptions(): array
-    {
-        $options = $this->knpSnappyOptions;
-
-        /** @var list<string> $allowedFiles */
-        $allowedFiles = $this->options['allowed_files'] ?? [];
-
-        if (empty($allowedFiles)) {
-            return $options;
-        }
-
-        if (!isset($options['allow'])) {
-            $options['allow'] = [];
-        } elseif (!is_array($options['allow'])) {
-            $options['allow'] = [$options['allow']];
-        }
-
-        $options['allow'] = array_merge(
-            $options['allow'],
-            array_map(fn (string $file): string => $this->fileLocator->locate($file), $allowedFiles),
-        );
-
-        return $options;
+        return $generator->getOutputFromHtml($html, $resolvedOptions);
     }
 }

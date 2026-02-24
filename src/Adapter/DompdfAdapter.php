@@ -14,21 +14,22 @@ declare(strict_types=1);
 namespace Sylius\PdfBundle\Adapter;
 
 use Dompdf\Dompdf;
-use Dompdf\Options;
+use Sylius\PdfBundle\Factory\GeneratorFactoryInterface;
 
 final class DompdfAdapter implements PdfGenerationAdapterInterface
 {
-    private readonly Options $dompdfOptions;
-
     /** @param array<string, mixed> $options */
-    public function __construct(array $options = [])
-    {
-        $this->dompdfOptions = new Options($options);
+    public function __construct(
+        private readonly GeneratorFactoryInterface $factory,
+        private readonly array $options,
+        private readonly string $context,
+    ) {
     }
 
     public function generate(string $html): string
     {
-        $dompdf = new Dompdf($this->dompdfOptions);
+        /** @var Dompdf $dompdf */
+        $dompdf = $this->factory->createGenerator($this->options, $this->context);
         $dompdf->loadHtml($html);
         $dompdf->render();
 

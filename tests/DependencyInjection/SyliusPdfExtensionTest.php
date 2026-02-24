@@ -15,8 +15,6 @@ namespace Tests\Sylius\PdfBundle\DependencyInjection;
 
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\Test;
-use Sylius\PdfBundle\Adapter\DompdfAdapter;
-use Sylius\PdfBundle\Adapter\KnpSnappyAdapter;
 use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
 use Sylius\PdfBundle\Manager\FilesystemPdfFileManager;
@@ -33,9 +31,35 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
     {
         $this->load();
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.default',
-            KnpSnappyAdapter::class,
+            'sylius_pdf.adapter.knp_snappy',
+        );
+    }
+
+    #[Test]
+    public function it_registers_default_factory_for_knp_snappy(): void
+    {
+        $this->load();
+
+        $this->assertContainerBuilderHasAlias(
+            'sylius_pdf.factory.default',
+            'sylius_pdf.factory.knp_snappy',
+        );
+    }
+
+    #[Test]
+    public function it_registers_dompdf_factory_when_configured(): void
+    {
+        $this->load([
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasAlias(
+            'sylius_pdf.factory.invoice',
+            'sylius_pdf.factory.dompdf',
         );
     }
 
@@ -82,14 +106,14 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.invoice',
-            DompdfAdapter::class,
+            'sylius_pdf.adapter.dompdf',
         );
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.coupon',
-            DompdfAdapter::class,
+            'sylius_pdf.adapter.dompdf',
         );
     }
 
@@ -100,9 +124,9 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             'default' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
         ]);
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.default',
-            DompdfAdapter::class,
+            'sylius_pdf.adapter.dompdf',
         );
     }
 
@@ -209,14 +233,14 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.default',
-            KnpSnappyAdapter::class,
+            'sylius_pdf.adapter.knp_snappy',
         );
 
-        $this->assertContainerBuilderHasService(
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.coupon',
-            DompdfAdapter::class,
+            'sylius_pdf.adapter.dompdf',
         );
 
         self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.invoice'));
@@ -313,6 +337,142 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
         ]);
 
         self::assertFalse($this->container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
+    }
+
+    #[Test]
+    public function it_stores_context_options_as_parameters(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy', 'options' => ['allowed_files' => ['logo.png']]],
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasParameter(
+            'sylius_pdf.adapter.default.options',
+            ['allowed_files' => ['logo.png']],
+        );
+
+        $this->assertContainerBuilderHasParameter(
+            'sylius_pdf.adapter.invoice.options',
+            ['defaultPaperSize' => 'a4'],
+        );
+    }
+
+    #[Test]
+    public function it_stores_context_options_for_custom_adapters(): void
+    {
+        $this->load([
+            'contexts' => [
+                'invoice' => ['adapter' => 'my_custom', 'options' => ['custom_key' => 'custom_value']],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasParameter(
+            'sylius_pdf.adapter.invoice.options',
+            ['custom_key' => 'custom_value'],
+        );
+    }
+
+    #[Test]
+    public function it_defers_custom_factory_to_compiler_pass(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy', 'factory' => 'my_custom_factory', 'options' => []],
+        ]);
+
+        self::assertTrue($this->container->hasParameter('sylius_pdf.deferred_factory_contexts'));
+
+        /** @var array<string, string> $deferred */
+        $deferred = $this->container->getParameter('sylius_pdf.deferred_factory_contexts');
+        self::assertSame(['default' => 'my_custom_factory'], $deferred);
+    }
+
+    #[Test]
+    public function it_does_not_set_deferred_factory_parameter_when_all_factories_are_built_in(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf', 'options' => []],
+            ],
+        ]);
+
+        self::assertFalse($this->container->hasParameter('sylius_pdf.deferred_factory_contexts'));
+    }
+
+    #[Test]
+    public function it_defers_custom_factory_for_context(): void
+    {
+        $this->load([
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf', 'factory' => 'my_custom_factory', 'options' => []],
+            ],
+        ]);
+
+        self::assertTrue($this->container->hasParameter('sylius_pdf.deferred_factory_contexts'));
+
+        /** @var array<string, string> $deferred */
+        $deferred = $this->container->getParameter('sylius_pdf.deferred_factory_contexts');
+        self::assertSame(['invoice' => 'my_custom_factory'], $deferred);
+    }
+
+    #[Test]
+    public function it_registers_built_in_factory_when_factory_matches_adapter(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy', 'factory' => 'knp_snappy', 'options' => []],
+        ]);
+
+        $this->assertContainerBuilderHasAlias(
+            'sylius_pdf.factory.default',
+            'sylius_pdf.factory.knp_snappy',
+        );
+
+        self::assertFalse($this->container->hasParameter('sylius_pdf.deferred_factory_contexts'));
+    }
+
+    #[Test]
+    public function it_loads_adapter_services_file_only_once_for_multiple_contexts(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'dompdf', 'options' => []],
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
+            'sylius_pdf.adapter.default',
+            'sylius_pdf.adapter.dompdf',
+        );
+
+        $this->assertContainerBuilderHasServiceDefinitionWithParent(
+            'sylius_pdf.adapter.invoice',
+            'sylius_pdf.adapter.dompdf',
+        );
+
+        $this->assertContainerBuilderHasAlias(
+            'sylius_pdf.factory.default',
+            'sylius_pdf.factory.dompdf',
+        );
+
+        $this->assertContainerBuilderHasAlias(
+            'sylius_pdf.factory.invoice',
+            'sylius_pdf.factory.dompdf',
+        );
+    }
+
+    #[Test]
+    public function it_does_not_load_unused_adapter_services(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'dompdf', 'options' => []],
+        ]);
+
+        self::assertFalse($this->container->hasDefinition('sylius_pdf.factory.knp_snappy'));
+        self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.knp_snappy'));
     }
 
     protected function getContainerExtensions(): array

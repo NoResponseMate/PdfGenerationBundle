@@ -17,13 +17,15 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Adapter\DompdfAdapter;
 use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Factory\DompdfGeneratorFactory;
+use Sylius\PdfBundle\Factory\GeneratorFactoryInterface;
 
 final class DompdfAdapterTest extends TestCase
 {
     #[Test]
     public function it_implements_pdf_generation_adapter_interface(): void
     {
-        $adapter = new DompdfAdapter();
+        $adapter = new DompdfAdapter(new DompdfGeneratorFactory(), [], 'default');
 
         self::assertInstanceOf(PdfGenerationAdapterInterface::class, $adapter);
     }
@@ -31,7 +33,7 @@ final class DompdfAdapterTest extends TestCase
     #[Test]
     public function it_generates_pdf_from_html(): void
     {
-        $adapter = new DompdfAdapter();
+        $adapter = new DompdfAdapter(new DompdfGeneratorFactory(), [], 'default');
 
         $result = $adapter->generate('<html><body>Hello</body></html>');
 
@@ -41,7 +43,24 @@ final class DompdfAdapterTest extends TestCase
     #[Test]
     public function it_generates_pdf_with_custom_options(): void
     {
-        $adapter = new DompdfAdapter(['defaultPaperSize' => 'a4']);
+        $adapter = new DompdfAdapter(new DompdfGeneratorFactory(), ['defaultPaperSize' => 'a4'], 'default');
+
+        $result = $adapter->generate('<html><body>Hello</body></html>');
+
+        self::assertStringStartsWith('%PDF-', $result);
+    }
+
+    #[Test]
+    public function it_delegates_to_factory_to_create_generator(): void
+    {
+        $factory = $this->createMock(GeneratorFactoryInterface::class);
+        $factory
+            ->expects(self::once())
+            ->method('createGenerator')
+            ->with(['defaultPaperSize' => 'a4'], 'invoice')
+            ->willReturn(new \Dompdf\Dompdf(new \Dompdf\Options(['defaultPaperSize' => 'a4'])));
+
+        $adapter = new DompdfAdapter($factory, ['defaultPaperSize' => 'a4'], 'invoice');
 
         $result = $adapter->generate('<html><body>Hello</body></html>');
 

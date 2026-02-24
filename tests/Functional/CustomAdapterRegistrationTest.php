@@ -21,7 +21,6 @@ use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
 use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\SyliusPdfBundle;
-use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -201,9 +200,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         $knpSnappyDefinition->setSynthetic(true);
         $container->setDefinition('knp_snappy.pdf', $knpSnappyDefinition);
 
-        $fileLocatorDefinition = new Definition(FileLocatorInterface::class);
-        $fileLocatorDefinition->setSynthetic(true);
-        $container->setDefinition('file_locator', $fileLocatorDefinition);
+        $container->setDefinition('file_locator', new Definition(\Symfony\Component\Config\FileLocator::class, [[]]));
 
         $twigDefinition = new Definition(Environment::class);
         $twigDefinition->setSynthetic(true);

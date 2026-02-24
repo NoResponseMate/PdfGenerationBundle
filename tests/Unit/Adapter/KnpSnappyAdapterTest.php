@@ -19,96 +19,37 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Adapter\KnpSnappyAdapter;
 use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
-use Symfony\Component\Config\FileLocatorInterface;
+use Sylius\PdfBundle\Factory\GeneratorFactoryInterface;
 
 final class KnpSnappyAdapterTest extends TestCase
 {
     private GeneratorInterface&MockObject $snappy;
 
-    private FileLocatorInterface&MockObject $fileLocator;
+    private GeneratorFactoryInterface&MockObject $factory;
+
+    protected function setUp(): void
+    {
+        $this->snappy = $this->createMock(GeneratorInterface::class);
+        $this->factory = $this->createMock(GeneratorFactoryInterface::class);
+        $this->factory->method('createGenerator')->willReturn($this->snappy);
+    }
 
     #[Test]
     public function it_implements_pdf_generation_adapter_interface(): void
     {
-        $adapter = new KnpSnappyAdapter(
-            $this->createMock(FileLocatorInterface::class),
-            $this->createMock(GeneratorInterface::class),
-        );
+        $adapter = new KnpSnappyAdapter($this->factory, [], 'default');
 
         self::assertInstanceOf(PdfGenerationAdapterInterface::class, $adapter);
     }
 
     #[Test]
-    public function it_generates_pdf_with_resolved_options(): void
+    public function it_delegates_to_factory_and_generates_pdf(): void
     {
-        $this->snappy = $this->createMock(GeneratorInterface::class);
-        $this->fileLocator = $this->createMock(FileLocatorInterface::class);
-
-        $adapter = new KnpSnappyAdapter(
-            $this->fileLocator,
-            $this->snappy,
-            ['allow' => 'allowed_file_in_knp_snappy_config.png'],
-            ['allowed_files' => ['swans.png']],
-        );
-
-        $this->fileLocator
+        $this->factory
             ->expects(self::once())
-            ->method('locate')
-            ->with('swans.png')
-            ->willReturn('located-path/swans.png');
-
-        $this->snappy
-            ->expects(self::once())
-            ->method('getOutputFromHtml')
-            ->with(
-                '<html>Hello</html>',
-                ['allow' => ['allowed_file_in_knp_snappy_config.png', 'located-path/swans.png']],
-            )
-            ->willReturn('PDF FILE');
-
-        $result = $adapter->generate('<html>Hello</html>');
-
-        self::assertSame('PDF FILE', $result);
-    }
-
-    #[Test]
-    public function it_generates_pdf_without_allowed_files_in_options(): void
-    {
-        $this->snappy = $this->createMock(GeneratorInterface::class);
-        $this->fileLocator = $this->createMock(FileLocatorInterface::class);
-
-        $adapter = new KnpSnappyAdapter(
-            $this->fileLocator,
-            $this->snappy,
-            ['margin-top' => '10mm'],
-            [],
-        );
-
-        $this->fileLocator
-            ->expects(self::never())
-            ->method('locate');
-
-        $this->snappy
-            ->expects(self::once())
-            ->method('getOutputFromHtml')
-            ->with('<html>Hello</html>', ['margin-top' => '10mm'])
-            ->willReturn('PDF FILE');
-
-        $result = $adapter->generate('<html>Hello</html>');
-
-        self::assertSame('PDF FILE', $result);
-    }
-
-    #[Test]
-    public function it_generates_pdf_with_no_options(): void
-    {
-        $this->snappy = $this->createMock(GeneratorInterface::class);
-        $this->fileLocator = $this->createMock(FileLocatorInterface::class);
-
-        $adapter = new KnpSnappyAdapter(
-            $this->fileLocator,
-            $this->snappy,
-        );
+            ->method('resolveOptions')
+            ->with([])
+            ->willReturn([]);
 
         $this->snappy
             ->expects(self::once())
@@ -116,8 +57,45 @@ final class KnpSnappyAdapterTest extends TestCase
             ->with('<html>Hello</html>', [])
             ->willReturn('PDF FILE');
 
-        $result = $adapter->generate('<html>Hello</html>');
+        $adapter = new KnpSnappyAdapter($this->factory, [], 'default');
 
-        self::assertSame('PDF FILE', $result);
+        self::assertSame('PDF FILE', $adapter->generate('<html>Hello</html>'));
+    }
+
+    #[Test]
+    public function it_passes_options_to_factory_for_resolution(): void
+    {
+        $this->factory
+            ->expects(self::once())
+            ->method('resolveOptions')
+            ->with(['allowed_files' => ['logo.png']])
+            ->willReturn(['margin-top' => '10mm', 'allow' => ['/resolved/logo.png']]);
+
+        $this->snappy
+            ->expects(self::once())
+            ->method('getOutputFromHtml')
+            ->with('<html>Hello</html>', ['margin-top' => '10mm', 'allow' => ['/resolved/logo.png']])
+            ->willReturn('PDF');
+
+        $adapter = new KnpSnappyAdapter($this->factory, ['allowed_files' => ['logo.png']], 'invoice');
+
+        self::assertSame('PDF', $adapter->generate('<html>Hello</html>'));
+    }
+
+    #[Test]
+    public function it_passes_context_to_factory(): void
+    {
+        $this->factory
+            ->expects(self::once())
+            ->method('createGenerator')
+            ->with(['key' => 'value'], 'invoice')
+            ->willReturn($this->snappy);
+
+        $this->factory->method('resolveOptions')->willReturn(['key' => 'value']);
+        $this->snappy->method('getOutputFromHtml')->willReturn('PDF');
+
+        $adapter = new KnpSnappyAdapter($this->factory, ['key' => 'value'], 'invoice');
+
+        $adapter->generate('<html>Hello</html>');
     }
 }
