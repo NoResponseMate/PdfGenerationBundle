@@ -15,5 +15,5 @@ namespace Sylius\PdfBundle\Core\Processor;
 
 interface OptionsProcessorInterface
 {
-    public function process(object $generator): void;
+    public function process(object $generator, string $context = 'default'): void;
 }

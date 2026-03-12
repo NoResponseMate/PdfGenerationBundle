@@ -30,7 +30,7 @@ final class KnpSnappyOptionsProcessor implements OptionsProcessorInterface
     ) {
     }
 
-    public function process(object $generator): void
+    public function process(object $generator, string $context = 'default'): void
     {
         /** @var AbstractGenerator $generator */
         $generator->setOptions($this->knpSnappyOptions);

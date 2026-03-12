@@ -19,8 +19,8 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 
 final class KnpSnappyAdapterTest extends TestCase
 {
@@ -28,31 +28,31 @@ final class KnpSnappyAdapterTest extends TestCase
 
     private GeneratorProviderRegistryInterface&MockObject $generatorProviderRegistry;
 
-    private MockObject&OptionsProcessorRegistryInterface $processorRegistry;
+    private MockObject&OptionsProcessorInterface $processor;
 
     protected function setUp(): void
     {
         $this->snappy = $this->createMock(GeneratorInterface::class);
         $this->generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
         $this->generatorProviderRegistry->method('get')->willReturn($this->snappy);
-        $this->processorRegistry = $this->createMock(OptionsProcessorRegistryInterface::class);
+        $this->processor = $this->createMock(OptionsProcessorInterface::class);
     }
 
     #[Test]
     public function it_implements_pdf_generation_adapter_interface(): void
     {
-        $adapter = new KnpSnappyAdapter($this->generatorProviderRegistry, $this->processorRegistry, 'default');
+        $adapter = new KnpSnappyAdapter($this->generatorProviderRegistry, $this->processor, 'default');
 
         self::assertInstanceOf(PdfGenerationAdapterInterface::class, $adapter);
     }
 
     #[Test]
-    public function it_delegates_to_registries_and_generates_pdf(): void
+    public function it_delegates_to_processor_and_generates_pdf(): void
     {
-        $this->processorRegistry
+        $this->processor
             ->expects(self::once())
             ->method('process')
-            ->with($this->snappy, 'knp_snappy', 'default');
+            ->with($this->snappy, 'default');
 
         $this->snappy
             ->expects(self::once())
@@ -60,13 +60,13 @@ final class KnpSnappyAdapterTest extends TestCase
             ->with('<html>Hello</html>')
             ->willReturn('PDF FILE');
 
-        $adapter = new KnpSnappyAdapter($this->generatorProviderRegistry, $this->processorRegistry, 'default');
+        $adapter = new KnpSnappyAdapter($this->generatorProviderRegistry, $this->processor, 'default');
 
         self::assertSame('PDF FILE', $adapter->generate('<html>Hello</html>'));
     }
 
     #[Test]
-    public function it_passes_context_to_registries(): void
+    public function it_passes_context_to_registry_and_processor(): void
     {
         $this->generatorProviderRegistry
             ->expects(self::once())
@@ -74,16 +74,16 @@ final class KnpSnappyAdapterTest extends TestCase
             ->with('knp_snappy', 'invoice')
             ->willReturn($this->snappy);
 
-        $this->processorRegistry
+        $this->processor
             ->expects(self::once())
             ->method('process')
-            ->with($this->snappy, 'knp_snappy', 'invoice');
+            ->with($this->snappy, 'invoice');
 
         $this->snappy->method('getOutputFromHtml')->willReturn('PDF');
 
         $adapter = new KnpSnappyAdapter(
             $this->generatorProviderRegistry,
-            $this->processorRegistry,
+            $this->processor,
             'invoice',
         );
 

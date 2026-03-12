@@ -15,8 +15,6 @@ use Sylius\PdfBundle\Core\Generator\PdfFileGenerator;
 use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
 use Sylius\PdfBundle\Core\Manager\FilesystemPdfFileManager;
 use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistry;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
@@ -57,9 +55,6 @@ return static function (ContainerConfigurator $container): void {
         ])
     ;
     $services->alias(PdfFileGeneratorInterface::class, 'sylius_pdf.generator');
-
-    $services->set('sylius_pdf.registry.options_processor', OptionsProcessorRegistry::class);
-    $services->alias(OptionsProcessorRegistryInterface::class, 'sylius_pdf.registry.options_processor');
 
     $services->set('sylius_pdf.registry.generator_provider', GeneratorProviderRegistry::class)
         ->args([

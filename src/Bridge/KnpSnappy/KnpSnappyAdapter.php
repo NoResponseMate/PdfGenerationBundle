@@ -15,8 +15,8 @@ namespace Sylius\PdfBundle\Bridge\KnpSnappy;
 
 use Knp\Snappy\GeneratorInterface;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 
 final class KnpSnappyAdapter implements PdfGenerationAdapterInterface
 {
@@ -24,7 +24,7 @@ final class KnpSnappyAdapter implements PdfGenerationAdapterInterface
 
     public function __construct(
         private readonly GeneratorProviderRegistryInterface $generatorProviderRegistry,
-        private readonly OptionsProcessorRegistryInterface $processorRegistry,
+        private readonly OptionsProcessorInterface $optionsProcessor,
         private readonly string $context,
     ) {
     }
@@ -33,7 +33,7 @@ final class KnpSnappyAdapter implements PdfGenerationAdapterInterface
     {
         /** @var GeneratorInterface $generator */
         $generator = $this->generatorProviderRegistry->get(self::NAME, $this->context);
-        $this->processorRegistry->process($generator, self::NAME, $this->context);
+        $this->optionsProcessor->process($generator, $this->context);
 
         return $generator->getOutputFromHtml($html);
     }

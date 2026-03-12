@@ -18,10 +18,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Manager\FilesystemPdfFileManager;
 use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistry;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
@@ -350,24 +349,34 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
     }
 
     #[Test]
-    public function it_registers_options_processor_registry(): void
+    public function it_creates_composite_options_processor_for_default_adapter(): void
     {
         $this->load();
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf.registry.options_processor',
-            OptionsProcessorRegistry::class,
+            'sylius_pdf.options_processor.composite.knp_snappy',
+            CompositeOptionsProcessor::class,
         );
     }
 
     #[Test]
-    public function it_aliases_options_processor_registry_interface(): void
+    public function it_creates_composite_options_processor_for_each_adapter_type(): void
     {
-        $this->load();
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
+            'contexts' => [
+                'invoice' => ['adapter' => 'dompdf'],
+            ],
+        ]);
 
-        $this->assertContainerBuilderHasAlias(
-            OptionsProcessorRegistryInterface::class,
-            'sylius_pdf.registry.options_processor',
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.options_processor.composite.knp_snappy',
+            CompositeOptionsProcessor::class,
+        );
+
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.options_processor.composite.dompdf',
+            CompositeOptionsProcessor::class,
         );
     }
 

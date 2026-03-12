@@ -15,8 +15,8 @@ namespace Sylius\PdfBundle\Bridge\Dompdf;
 
 use Dompdf\Dompdf;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 
 final class DompdfAdapter implements PdfGenerationAdapterInterface
 {
@@ -24,7 +24,7 @@ final class DompdfAdapter implements PdfGenerationAdapterInterface
 
     public function __construct(
         private readonly GeneratorProviderRegistryInterface $generatorProviderRegistry,
-        private readonly OptionsProcessorRegistryInterface $processorRegistry,
+        private readonly OptionsProcessorInterface $optionsProcessor,
         private readonly string $context,
     ) {
     }
@@ -33,7 +33,7 @@ final class DompdfAdapter implements PdfGenerationAdapterInterface
     {
         /** @var Dompdf $dompdf */
         $dompdf = $this->generatorProviderRegistry->get(self::NAME, $this->context);
-        $this->processorRegistry->process($dompdf, self::NAME, $this->context);
+        $this->optionsProcessor->process($dompdf, $this->context);
         $dompdf->loadHtml($html);
         $dompdf->render();
 

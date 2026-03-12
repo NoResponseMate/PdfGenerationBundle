@@ -275,14 +275,8 @@ Processors without a `context` attribute run for every context of their adapter 
 | `sylius_pdf.manager`                     | `PdfFileManagerInterface`            | Stores and retrieves PDF files   |
 | `sylius_pdf.generator`                   | `PdfFileGeneratorInterface`          | Generates and persists PDF files |
 | `sylius_pdf.registry.generator_provider` | `GeneratorProviderRegistryInterface` | Resolves generator providers     |
-| `sylius_pdf.registry.options_processor`  | `OptionsProcessorRegistryInterface`  | Runs options processors          |
 
-All interfaces are aliased for autowiring.
-
-## Requirements
-
-- PHP >= 8.2
-- Symfony ^6.4 or ^7.4
+All interfaces (except internal composites) are aliased for autowiring.
 
 ## License
 

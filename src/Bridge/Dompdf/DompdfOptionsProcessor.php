@@ -25,7 +25,7 @@ final class DompdfOptionsProcessor implements OptionsProcessorInterface
     ) {
     }
 
-    public function process(object $generator): void
+    public function process(object $generator, string $context = 'default'): void
     {
         if ([] === $this->options) {
             return;

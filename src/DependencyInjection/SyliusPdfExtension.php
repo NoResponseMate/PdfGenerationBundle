@@ -16,11 +16,13 @@ namespace Sylius\PdfBundle\DependencyInjection;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -98,6 +100,7 @@ final class SyliusPdfExtension extends Extension
         }
 
         $this->loadAdapterServices($loader, $adapterName, $loadedAdapterFiles);
+        $this->ensureCompositeProcessorExists($container, $adapterName);
 
         $adapterServiceId = sprintf('sylius_pdf.adapter.%s', $contextName);
 
@@ -139,6 +142,17 @@ final class SyliusPdfExtension extends Extension
         $processorDefinition->addTag('sylius_pdf.options_processor', $tagAttributes);
 
         $container->setDefinition($processorServiceId, $processorDefinition);
+    }
+
+    private function ensureCompositeProcessorExists(ContainerBuilder $container, string $adapterName): void
+    {
+        $compositeId = sprintf('sylius_pdf.options_processor.composite.%s', $adapterName);
+
+        if ($container->hasDefinition($compositeId)) {
+            return;
+        }
+
+        $container->setDefinition($compositeId, new Definition(CompositeOptionsProcessor::class, [[]]));
     }
 
     /**

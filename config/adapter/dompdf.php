@@ -12,8 +12,8 @@
 declare(strict_types=1);
 
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
-use Sylius\PdfBundle\Bridge\Dompdf\DompdfOptionsProcessor;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfGeneratorProvider;
+use Sylius\PdfBundle\Bridge\Dompdf\DompdfOptionsProcessor;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
@@ -34,7 +34,7 @@ return static function (ContainerConfigurator $container): void {
         ->abstract()
         ->args([
             service('sylius_pdf.registry.generator_provider'),
-            service('sylius_pdf.registry.options_processor'),
+            service('sylius_pdf.options_processor.composite.dompdf'),
             abstract_arg('context name, set by SyliusPdfExtension'),
         ])
     ;

@@ -18,10 +18,9 @@ use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfGeneratorProvider;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistry;
-use Sylius\PdfBundle\Core\Registry\OptionsProcessorRegistryInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class DompdfAdapterTest extends TestCase
@@ -40,7 +39,7 @@ final class DompdfAdapterTest extends TestCase
     {
         $adapter = new DompdfAdapter(
             $this->createRegistryWithDompdfProvider(),
-            new OptionsProcessorRegistry(),
+            $this->createMock(OptionsProcessorInterface::class),
             'default',
         );
 
@@ -52,7 +51,7 @@ final class DompdfAdapterTest extends TestCase
     {
         $adapter = new DompdfAdapter(
             $this->createRegistryWithDompdfProvider(),
-            new OptionsProcessorRegistry(),
+            $this->createMock(OptionsProcessorInterface::class),
             'default',
         );
 
@@ -73,7 +72,7 @@ final class DompdfAdapterTest extends TestCase
 
         $adapter = new DompdfAdapter(
             $generatorProviderRegistry,
-            new OptionsProcessorRegistry(),
+            $this->createMock(OptionsProcessorInterface::class),
             'invoice',
         );
 
@@ -83,18 +82,18 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_calls_processor_registry(): void
+    public function it_calls_options_processor_with_generator_and_context(): void
     {
-        $registry = $this->createMock(OptionsProcessorRegistryInterface::class);
-        $registry
+        $processor = $this->createMock(OptionsProcessorInterface::class);
+        $processor
             ->expects(self::once())
             ->method('process')
-            ->with(self::isInstanceOf(\Dompdf\Dompdf::class), 'dompdf', 'default');
+            ->with(self::isInstanceOf(\Dompdf\Dompdf::class), 'invoice');
 
         $adapter = new DompdfAdapter(
             $this->createRegistryWithDompdfProvider(),
-            $registry,
-            'default',
+            $processor,
+            'invoice',
         );
 
         $adapter->generate('<html><body>Hello</body></html>');

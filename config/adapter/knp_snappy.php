@@ -12,13 +12,13 @@
 declare(strict_types=1);
 
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
-use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyOptionsProcessor;
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyGeneratorProvider;
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyOptionsProcessor;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
@@ -42,7 +42,7 @@ return static function (ContainerConfigurator $container): void {
         ->abstract()
         ->args([
             service('sylius_pdf.registry.generator_provider'),
-            service('sylius_pdf.registry.options_processor'),
+            service('sylius_pdf.options_processor.composite.knp_snappy'),
             abstract_arg('context name, set by SyliusPdfExtension'),
         ])
     ;

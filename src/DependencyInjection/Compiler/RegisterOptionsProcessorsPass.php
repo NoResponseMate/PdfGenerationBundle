@@ -13,18 +13,16 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\DependencyInjection\Compiler;
 
+use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 final class RegisterOptionsProcessorsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition('sylius_pdf.registry.options_processor')) {
-            return;
-        }
-
         $taggedServices = $container->findTaggedServiceIds('sylius_pdf.options_processor');
 
         if ([] === $taggedServices) {
@@ -46,7 +44,7 @@ final class RegisterOptionsProcessorsPass implements CompilerPassInterface
                 $adapter = $attributes['adapter'];
                 $context = isset($attributes['context']) && is_string($attributes['context']) && '' !== $attributes['context']
                     ? $attributes['context']
-                    : '';
+                    : 'default';
                 $priority = isset($attributes['priority']) ? (int) $attributes['priority'] : 0;
 
                 $grouped[$adapter][$context][] = [
@@ -56,22 +54,25 @@ final class RegisterOptionsProcessorsPass implements CompilerPassInterface
             }
         }
 
-        $registryDefinition = $container->getDefinition('sylius_pdf.registry.options_processor');
-
         foreach ($grouped as $adapterType => $contexts) {
+            $compositeId = sprintf('sylius_pdf.options_processor.composite.%s', $adapterType);
+
+            /** @var array<string, list<Reference>> $contextReferences */
+            $contextReferences = [];
+
             foreach ($contexts as $contextKey => $entries) {
                 usort($entries, static fn (array $a, array $b): int => $b['priority'] <=> $a['priority']);
 
-                $references = array_map(
+                $contextReferences[$contextKey] = array_map(
                     static fn (array $entry): Reference => new Reference($entry['service_id']),
                     $entries,
                 );
-
-                $registryDefinition->addMethodCall(
-                    'registerProcessors',
-                    [$adapterType, '' === $contextKey ? 'default' : $contextKey, $references],
-                );
             }
+
+            $container->setDefinition(
+                $compositeId,
+                new Definition(CompositeOptionsProcessor::class, [$contextReferences]),
+            );
         }
     }
 }
