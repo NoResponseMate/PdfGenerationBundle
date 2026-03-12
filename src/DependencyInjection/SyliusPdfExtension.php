@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\DependencyInjection;
 
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
@@ -25,7 +27,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 final class SyliusPdfExtension extends Extension
 {
-    private const BUILT_IN_ADAPTERS = ['knp_snappy', 'dompdf'];
+    private const BUILT_IN_ADAPTERS = [KnpSnappyAdapter::NAME, DompdfAdapter::NAME];
 
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -41,12 +43,9 @@ final class SyliusPdfExtension extends Extension
 
         $adapterReferences = [];
         $deferredAdapterContexts = [];
-        $deferredFactoryContexts = [];
         $loadedAdapterFiles = [];
 
-        $this->storeContextOptions($container, 'default', $config['default']['options']);
-
-        if ($this->registerAdapter($container, $loader, 'default', $config['default'], $deferredFactoryContexts, $loadedAdapterFiles)) {
+        if ($this->registerAdapter($container, $loader, 'default', $config['default']['adapter'], $config['default']['options'] ?? [], $loadedAdapterFiles)) {
             $adapterReferences['default'] = new Reference('sylius_pdf.adapter.default');
             $container->setAlias(PdfGenerationAdapterInterface::class, 'sylius_pdf.adapter.default');
         } else {
@@ -60,9 +59,7 @@ final class SyliusPdfExtension extends Extension
         foreach ($config['contexts'] as $contextName => $contextConfig) {
             $contextName = (string) $contextName;
 
-            $this->storeContextOptions($container, $contextName, $contextConfig['options']);
-
-            if ($this->registerAdapter($container, $loader, $contextName, $contextConfig, $deferredFactoryContexts, $loadedAdapterFiles)) {
+            if ($this->registerAdapter($container, $loader, $contextName, $contextConfig['adapter'], $contextConfig['options'] ?? [], $loadedAdapterFiles)) {
                 $adapterReferences[$contextName] = new Reference(sprintf('sylius_pdf.adapter.%s', $contextName));
             } else {
                 $deferredAdapterContexts[$contextName] = $contextConfig['adapter'];
@@ -82,53 +79,66 @@ final class SyliusPdfExtension extends Extension
         if ([] !== $deferredAdapterContexts) {
             $container->setParameter('sylius_pdf.deferred_adapter_contexts', $deferredAdapterContexts);
         }
-
-        if ([] !== $deferredFactoryContexts) {
-            $container->setParameter('sylius_pdf.deferred_factory_contexts', $deferredFactoryContexts);
-        }
     }
 
     /**
-     * @param array{adapter: string, factory: ?string, options: array<string, mixed>} $contextConfig
-     * @param array<string, string> $deferredFactoryContexts
+     * @param array<string, mixed> $options
      * @param array<string, true> $loadedAdapterFiles
      */
     private function registerAdapter(
         ContainerBuilder $container,
         PhpFileLoader $loader,
         string $contextName,
-        array $contextConfig,
-        array &$deferredFactoryContexts,
+        string $adapterName,
+        array $options,
         array &$loadedAdapterFiles,
     ): bool {
-        $adapterName = $contextConfig['adapter'];
-
         if (!in_array($adapterName, self::BUILT_IN_ADAPTERS, true)) {
             return false;
         }
 
         $this->loadAdapterServices($loader, $adapterName, $loadedAdapterFiles);
 
-        $factoryServiceId = sprintf('sylius_pdf.factory.%s', $contextName);
-
-        if (null === $contextConfig['factory'] || $adapterName === $contextConfig['factory']) {
-            $container->setAlias($factoryServiceId, sprintf('sylius_pdf.factory.%s', $adapterName));
-        } else {
-            $deferredFactoryContexts[$contextName] = $contextConfig['factory'];
-        }
-
         $adapterServiceId = sprintf('sylius_pdf.adapter.%s', $contextName);
+
         $container->setDefinition(
             $adapterServiceId,
             (new ChildDefinition(sprintf('sylius_pdf.adapter.%s', $adapterName)))
-                ->setArguments([
-                    new Reference($factoryServiceId),
-                    $contextConfig['options'],
-                    $contextName,
-                ]),
+                ->replaceArgument('$context', $contextName),
         );
 
+        $this->registerProcessor($container, $contextName, $adapterName, $options);
+
         return true;
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    private function registerProcessor(
+        ContainerBuilder $container,
+        string $contextName,
+        string $adapterName,
+        array $options,
+    ): void {
+        $processorServiceId = sprintf('sylius_pdf.options_processor.%s.%s', $adapterName, $contextName);
+        $processorDefinition = new ChildDefinition(sprintf('sylius_pdf.options_processor.%s', $adapterName));
+
+        if (KnpSnappyAdapter::NAME === $adapterName) {
+            $processorDefinition->setArgument('$allowedFiles', $options['allowed_files'] ?? []);
+        }
+
+        if (DompdfAdapter::NAME === $adapterName) {
+            $processorDefinition->setArgument('$options', $options);
+        }
+
+        $tagAttributes = ['adapter' => $adapterName];
+        if ('default' !== $contextName) {
+            $tagAttributes['context'] = $contextName;
+        }
+        $processorDefinition->addTag('sylius_pdf.options_processor', $tagAttributes);
+
+        $container->setDefinition($processorServiceId, $processorDefinition);
     }
 
     /**
@@ -142,11 +152,5 @@ final class SyliusPdfExtension extends Extension
 
         $loader->load(sprintf('adapter/%s.php', $adapterName));
         $loadedAdapterFiles[$adapterName] = true;
-    }
-
-    /** @param array<string, mixed> $options */
-    private function storeContextOptions(ContainerBuilder $container, string $contextName, array $options): void
-    {
-        $container->setParameter(sprintf('sylius_pdf.adapter.%s.options', $contextName), $options);
     }
 }

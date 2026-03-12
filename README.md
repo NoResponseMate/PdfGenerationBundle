@@ -8,13 +8,13 @@
     </a>
 </p>
 
-<h1 align="center">SyliusPdfBundle</h1>
+<h1 align="center">PdfBundle</h1>
 
 <p align="center">A Symfony bundle providing a swappable PDF generation abstraction with context-based adapter selection.</p>
 
 ## Overview
 
-SyliusPdfBundle decouples PDF rendering from application-specific logic by providing a clean adapter-based architecture. Choose between built-in adapters or register your own - each rendering context can use a different adapter with its own configuration.
+This bundle decouples PDF rendering from application-specific logic by providing a clean adapter-based architecture. Choose between built-in adapters or register your own - each rendering context can use a different adapter with its own configuration.
 
 **Built-in adapters:**
 
@@ -57,26 +57,20 @@ sylius_pdf:
     pdf_files_directory: '%kernel.project_dir%/private/pdf'
     default:
         adapter: dompdf
-        options:
-            defaultPaperSize: a4
     contexts:
         invoice:
             adapter: knp_snappy
             pdf_files_directory: '%kernel.project_dir%/private/invoices'
-            options:
-                allowed_files:
-                    - '%kernel.project_dir%/public/images/logo.png'
 ```
 
-| Key                   | Description                                                                          |
-|-----------------------|--------------------------------------------------------------------------------------|
-| `pdf_files_directory` | Root-level fallback directory for storing generated PDF files.                       |
-| `default`             | Configuration for the default context (used when no context is specified).           |
-| `contexts`            | Named contexts, each with its own adapter, options, and optional directory override. |
-| `adapter`             | Adapter name: `knp_snappy`, `dompdf`, or a custom adapter key.                       |
-| `options`             | Adapter-specific options passed to the underlying library.                           |
+| Key                   | Description                                                                |
+|-----------------------|----------------------------------------------------------------------------|
+| `pdf_files_directory` | Root-level fallback directory for storing generated PDF files.             |
+| `default`             | Configuration for the default context (used when no context is specified). |
+| `contexts`            | Named contexts, each with its own adapter and optional directory override. |
+| `adapter`             | Adapter name: `knp_snappy` (default), `dompdf`, or a custom adapter key.   |
 
-Each context (including `default`) can override `pdf_files_directory`. When omitted, the root-level value is inherited.
+Each context (including `default`) can override `pdf_files_directory`. When omitted, the root-level value is inherited. The context name `default` is reserved and cannot be used inside `contexts`.
 
 ## Usage
 
@@ -85,7 +79,7 @@ Each context (including `default`) can override `pdf_files_directory`. When omit
 Inject `HtmlToPdfRendererInterface` and call `render()`:
 
 ```php
-use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 
 final class InvoiceController
 {
@@ -109,7 +103,7 @@ final class InvoiceController
 Inject `TwigToPdfRendererInterface` to render a Twig template directly:
 
 ```php
-use Sylius\PdfBundle\Renderer\TwigToPdfRendererInterface;
+use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 
 $pdfContent = $this->twigRenderer->render(
     'invoice/template.html.twig',
@@ -117,12 +111,14 @@ $pdfContent = $this->twigRenderer->render(
 );
 ```
 
+Requires `symfony/twig-bundle`.
+
 ### Using contexts
 
 Pass a context name to route rendering to a specific adapter:
 
 ```php
-// Uses the 'invoice' context adapter and options
+// Uses the 'invoice' context adapter
 $pdfContent = $this->renderer->render($html, 'invoice');
 ```
 
@@ -131,7 +127,7 @@ $pdfContent = $this->renderer->render($html, 'invoice');
 Use `PdfFileGeneratorInterface` to generate and persist PDF files:
 
 ```php
-use Sylius\PdfBundle\Generator\PdfFileGeneratorInterface;
+use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
 
 $pdfFile = $this->generator->generate('invoice_001.pdf', $pdfContent, 'invoice');
 
@@ -142,8 +138,8 @@ $pdfFile->fullPath();  // '/path/to/private/invoices/invoice_001.pdf'
 Or use `PdfFileManagerInterface` directly for fine-grained control:
 
 ```php
-use Sylius\PdfBundle\Manager\PdfFileManagerInterface;
-use Sylius\PdfBundle\Model\PdfFile;
+use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Model\PdfFile;
 
 // Save
 $this->manager->save(new PdfFile('report.pdf', $content), 'invoice');
@@ -158,13 +154,15 @@ $file = $this->manager->get('report.pdf', 'invoice');
 $this->manager->remove('report.pdf', 'invoice');
 ```
 
-## Custom adapters
+## Extending the bundle
 
-### Via PHP attribute (recommended)
+### Custom adapters
+
+#### Via PHP attribute (recommended)
 
 ```php
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
 
 #[AsPdfGenerationAdapter('gotenberg')]
 final class GotenbergAdapter implements PdfGenerationAdapterInterface
@@ -176,7 +174,7 @@ final class GotenbergAdapter implements PdfGenerationAdapterInterface
 }
 ```
 
-### Via service tag
+#### Via service tag
 
 ```yaml
 services:
@@ -193,14 +191,91 @@ sylius_pdf:
         adapter: gotenberg
 ```
 
+Custom adapters are user-managed services - the bundle does not pass configuration options to them.
+
+### Custom generator providers
+
+Generator providers create the underlying PDF library instance (e.g. a `Dompdf` or `Knp\Snappy\GeneratorInterface` object). Register a custom provider to control how the generator is instantiated:
+
+#### Via PHP attribute
+
+```php
+use Sylius\PdfBundle\Core\Attribute\AsPdfGeneratorProvider;
+use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
+
+#[AsPdfGeneratorProvider(key: 'dompdf', context: 'invoice')]
+final class InvoiceDompdfProvider implements GeneratorProviderInterface
+{
+    public function get(?string $context = null): \Dompdf\Dompdf
+    {
+        $dompdf = new \Dompdf\Dompdf();
+        // Custom setup for the invoice context...
+        return $dompdf;
+    }
+}
+```
+
+#### Via service tag
+
+```yaml
+services:
+    App\Pdf\InvoiceDompdfProvider:
+        tags:
+            - { name: 'sylius_pdf.generator_provider', key: 'dompdf', context: 'invoice' }
+```
+
+The `key` must match the adapter name. The optional `context` scopes the provider to a specific context; without it, the provider is used as the default for that adapter.
+
+### Custom options processors
+
+Options processors configure the generator instance before PDF generation. They receive the generator object and modify it directly:
+
+#### Via PHP attribute
+
+```php
+use Sylius\PdfBundle\Core\Attribute\AsPdfOptionsProcessor;
+use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
+
+#[AsPdfOptionsProcessor(adapter: 'dompdf', context: 'invoice', priority: 10)]
+final class InvoicePaperSizeProcessor implements OptionsProcessorInterface
+{
+    public function process(object $generator): void
+    {
+        /** @var \Dompdf\Dompdf $generator */
+        $generator->setOptions(new \Dompdf\Options(['defaultPaperSize' => 'a4']));
+    }
+}
+```
+
+#### Via service tag
+
+```yaml
+services:
+    App\Pdf\InvoicePaperSizeProcessor:
+        tags:
+            - { name: 'sylius_pdf.options_processor', adapter: 'dompdf', context: 'invoice', priority: 10 }
+```
+
+Tag attributes:
+
+| Attribute  | Required | Description                                                                |
+|------------|----------|----------------------------------------------------------------------------|
+| `adapter`  | Yes      | The adapter type this processor applies to (e.g. `dompdf`, `knp_snappy`).  |
+| `context`  | No       | Limits the processor to a specific context. Omit to apply to all contexts. |
+| `priority` | No       | Higher values run first. Defaults to `0`.                                  |
+
+Processors without a `context` attribute run for every context of their adapter type. Context-specific processors run after the default ones.
+
 ## Service reference
 
-| Service ID | Interface | Description |
-|------------|-----------|-------------|
-| `sylius_pdf.renderer.html` | `HtmlToPdfRendererInterface` | Renders HTML string to PDF |
-| `sylius_pdf.renderer.twig` | `TwigToPdfRendererInterface` | Renders Twig template to PDF |
-| `sylius_pdf.manager` | `PdfFileManagerInterface` | Stores and retrieves PDF files |
-| `sylius_pdf.generator` | `PdfFileGeneratorInterface` | Generates and persists PDF files |
+| Service ID                               | Interface                            | Description                      |
+|------------------------------------------|--------------------------------------|----------------------------------|
+| `sylius_pdf.renderer.html`               | `HtmlToPdfRendererInterface`         | Renders HTML string to PDF       |
+| `sylius_pdf.renderer.twig`               | `TwigToPdfRendererInterface`         | Renders Twig template to PDF     |
+| `sylius_pdf.manager`                     | `PdfFileManagerInterface`            | Stores and retrieves PDF files   |
+| `sylius_pdf.generator`                   | `PdfFileGeneratorInterface`          | Generates and persists PDF files |
+| `sylius_pdf.registry.generator_provider` | `GeneratorProviderRegistryInterface` | Resolves generator providers     |
+| `sylius_pdf.registry.options_processor`  | `OptionsProcessorRegistryInterface`  | Runs options processors          |
 
 All interfaces are aliased for autowiring.
 

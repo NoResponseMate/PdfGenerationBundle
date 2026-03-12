@@ -27,17 +27,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => null, 'options' => [], 'pdf_files_directory' => null]],
-            'default',
-        );
-    }
-
-    #[Test]
-    public function it_has_empty_options_by_default(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => null, 'options' => [], 'pdf_files_directory' => null]],
+            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => null]],
             'default',
         );
     }
@@ -47,12 +37,12 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [['contexts' => [
-                'invoice' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
-                'coupon' => ['adapter' => 'dompdf', 'options' => ['isRemoteEnabled' => true]],
+                'invoice' => ['adapter' => 'dompdf'],
+                'coupon' => ['adapter' => 'dompdf'],
             ]]],
             ['contexts' => [
-                'invoice' => ['adapter' => 'dompdf', 'factory' => null, 'options' => ['defaultPaperSize' => 'a4'], 'pdf_files_directory' => null],
-                'coupon' => ['adapter' => 'dompdf', 'factory' => null, 'options' => ['isRemoteEnabled' => true], 'pdf_files_directory' => null],
+                'invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => null],
+                'coupon' => ['adapter' => 'dompdf', 'pdf_files_directory' => null],
             ]],
             'contexts',
         );
@@ -92,7 +82,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => null, 'options' => [], 'pdf_files_directory' => null]],
+            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => null]],
             'default',
         );
     }
@@ -102,7 +92,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [['contexts' => ['invoice' => ['adapter' => 'dompdf']]]],
-            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'factory' => null, 'options' => [], 'pdf_files_directory' => null]]],
+            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => null]]],
             'contexts',
         );
     }
@@ -112,7 +102,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => '/custom/invoices']]]],
-            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'factory' => null, 'options' => [], 'pdf_files_directory' => '/custom/invoices']]],
+            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => '/custom/invoices']]],
             'contexts',
         );
     }
@@ -122,7 +112,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [['default' => ['pdf_files_directory' => '/custom/default']]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => null, 'options' => [], 'pdf_files_directory' => '/custom/default']],
+            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => '/custom/default']],
             'default',
         );
     }
@@ -134,36 +124,6 @@ final class SyliusPdfConfigurationTest extends TestCase
             [[]],
             ['contexts' => []],
             'contexts',
-        );
-    }
-
-    #[Test]
-    public function it_allows_factory_to_be_set_in_default_block(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [['default' => ['factory' => 'my_custom_factory']]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => 'my_custom_factory', 'options' => [], 'pdf_files_directory' => null]],
-            'default',
-        );
-    }
-
-    #[Test]
-    public function it_allows_factory_to_be_set_per_context(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [['contexts' => ['invoice' => ['adapter' => 'dompdf', 'factory' => 'my_custom_factory']]]],
-            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'factory' => 'my_custom_factory', 'options' => [], 'pdf_files_directory' => null]]],
-            'contexts',
-        );
-    }
-
-    #[Test]
-    public function it_has_null_factory_by_default(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'factory' => null, 'options' => [], 'pdf_files_directory' => null]],
-            'default',
         );
     }
 

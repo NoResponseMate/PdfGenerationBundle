@@ -14,10 +14,12 @@ declare(strict_types=1);
 use Knp\Bundle\SnappyBundle\KnpSnappyBundle;
 use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
+use Symfony\Bundle\TwigBundle\TwigBundle;
 
 $bundles = [
     FrameworkBundle::class => ['all' => true],
     SyliusPdfBundle::class => ['all' => true],
+    TwigBundle::class => ['all' => true],
 ];
 
 if (class_exists(KnpSnappyBundle::class)) {

@@ -16,10 +16,10 @@ namespace Tests\Sylius\PdfBundle\Functional;
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Adapter\DompdfAdapter;
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
-use Sylius\PdfBundle\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -34,9 +34,9 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_compiles_container_with_built_in_adapters_only(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'dompdf', 'options' => ['defaultPaperSize' => 'a4']],
+                'invoice' => ['adapter' => 'dompdf'],
             ],
         ]);
 
@@ -58,9 +58,9 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_compiles_container_with_custom_adapter_via_tag(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'stub_custom', 'options' => []],
+                'invoice' => ['adapter' => 'stub_custom'],
             ],
         ]);
 
@@ -80,7 +80,7 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_compiles_container_with_custom_adapter_as_default(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'stub_custom', 'options' => []],
+            'default' => ['adapter' => 'stub_custom'],
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);
@@ -105,10 +105,10 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_compiles_container_with_mixed_built_in_and_custom_adapters(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'stub_custom', 'options' => []],
-                'coupon' => ['adapter' => 'dompdf', 'options' => []],
+                'invoice' => ['adapter' => 'stub_custom'],
+                'coupon' => ['adapter' => 'dompdf'],
             ],
         ]);
 
@@ -133,9 +133,9 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_compiles_container_with_custom_adapter_via_attribute_autoconfiguration(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'stub_custom', 'options' => []],
+                'invoice' => ['adapter' => 'stub_custom'],
             ],
         ]);
 
@@ -155,9 +155,9 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_throws_during_compilation_when_custom_adapter_is_not_registered(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'knp_snappy', 'options' => []],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'nonexistent', 'options' => []],
+                'invoice' => ['adapter' => 'nonexistent'],
             ],
         ]);
 
@@ -171,7 +171,7 @@ final class CustomAdapterRegistrationTest extends TestCase
     public function it_renders_pdf_through_compiled_service_locator(): void
     {
         $container = $this->createContainer([
-            'default' => ['adapter' => 'stub_custom', 'options' => []],
+            'default' => ['adapter' => 'stub_custom'],
         ]);
 
         $stubDefinition = new Definition(StubCustomAdapter::class);

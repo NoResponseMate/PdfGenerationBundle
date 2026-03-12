@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Functional\Stub;
 
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
 
 #[AsPdfGenerationAdapter('stub_custom')]
 final class StubCustomAdapter implements PdfGenerationAdapterInterface

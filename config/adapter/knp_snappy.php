@@ -11,22 +11,39 @@
 
 declare(strict_types=1);
 
-use Sylius\PdfBundle\Adapter\KnpSnappyAdapter;
-use Sylius\PdfBundle\Factory\KnpSnappyGeneratorFactory;
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyOptionsProcessor;
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyGeneratorProvider;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\param;
 
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    $services->set('sylius_pdf.factory.knp_snappy', KnpSnappyGeneratorFactory::class)
+    $services->set('sylius_pdf.generator_provider.knp_snappy', KnpSnappyGeneratorProvider::class)
         ->args([
             service('knp_snappy.pdf'),
+        ])
+        ->tag('sylius_pdf.generator_provider', ['key' => KnpSnappyAdapter::NAME])
+    ;
+
+    $services->set('sylius_pdf.options_processor.knp_snappy', KnpSnappyOptionsProcessor::class)
+        ->args([
             service('file_locator'),
-            '%knp_snappy.pdf.options%',
-        ]);
+            param('knp_snappy.pdf.options'),
+        ])
+        ->abstract()
+    ;
 
     $services->set('sylius_pdf.adapter.knp_snappy', KnpSnappyAdapter::class)
-        ->abstract();
+        ->abstract()
+        ->args([
+            service('sylius_pdf.registry.generator_provider'),
+            service('sylius_pdf.registry.options_processor'),
+            abstract_arg('context name, set by SyliusPdfExtension'),
+        ])
+    ;
 };

@@ -15,9 +15,9 @@ namespace Tests\Sylius\PdfBundle\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
 use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterPdfGenerationAdaptersPass;
-use Sylius\PdfBundle\Renderer\HtmlToPdfRenderer;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;

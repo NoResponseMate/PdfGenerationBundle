@@ -16,3 +16,8 @@ phpstan.neon
 /phpunit.xml
 /.phpunit.cache/
 ###< phpunit/phpunit ###
+
+###> symfony/framework-bundle ###
+/config/reference.php
+/tests/Application/config/reference.php
+###< symfony/framework-bundle ###

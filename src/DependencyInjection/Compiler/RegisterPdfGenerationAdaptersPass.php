@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\DependencyInjection\Compiler;
 
-use Sylius\PdfBundle\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

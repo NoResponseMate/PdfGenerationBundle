@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle;
 
-use Sylius\PdfBundle\Attribute\AsPdfGenerationAdapter;
-use Sylius\PdfBundle\Attribute\AsPdfGeneratorFactory;
+use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfBundle\Core\Attribute\AsPdfGeneratorProvider;
+use Sylius\PdfBundle\Core\Attribute\AsPdfOptionsProcessor;
+use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterGeneratorProvidersPass;
+use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterOptionsProcessorsPass;
 use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterPdfGenerationAdaptersPass;
-use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterPdfGeneratorFactoriesPass;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -40,13 +42,28 @@ final class SyliusPdfBundle extends Bundle
         );
 
         $container->registerAttributeForAutoconfiguration(
-            AsPdfGeneratorFactory::class,
-            static function (ChildDefinition $definition, AsPdfGeneratorFactory $attribute): void {
-                $definition->addTag('sylius_pdf.factory', ['key' => $attribute->key]);
+            AsPdfGeneratorProvider::class,
+            static function (ChildDefinition $definition, AsPdfGeneratorProvider $attribute): void {
+                $definition->addTag('sylius_pdf.generator_provider', [
+                    'key' => $attribute->key,
+                    'context' => $attribute->context,
+                ]);
             },
         );
 
-        $container->addCompilerPass(new RegisterPdfGeneratorFactoriesPass());
+        $container->registerAttributeForAutoconfiguration(
+            AsPdfOptionsProcessor::class,
+            static function (ChildDefinition $definition, AsPdfOptionsProcessor $attribute): void {
+                $definition->addTag('sylius_pdf.options_processor', [
+                    'adapter' => $attribute->adapter,
+                    'context' => $attribute->context,
+                    'priority' => $attribute->priority,
+                ]);
+            },
+        );
+
+        $container->addCompilerPass(new RegisterGeneratorProvidersPass());
+        $container->addCompilerPass(new RegisterOptionsProcessorsPass());
         $container->addCompilerPass(new RegisterPdfGenerationAdaptersPass());
     }
 }

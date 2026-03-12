@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\DependencyInjection;
 
+use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -35,13 +36,7 @@ final class Configuration implements ConfigurationInterface
                     ->arrayPrototype()
                         ->children()
                             ->scalarNode('adapter')
-                                ->defaultValue('knp_snappy')
-                            ->end()
-                            ->scalarNode('factory')
-                                ->defaultNull()
-                            ->end()
-                            ->variableNode('options')
-                                ->defaultValue([])
+                                ->defaultValue(KnpSnappyAdapter::NAME)
                             ->end()
                             ->scalarNode('pdf_files_directory')
                                 ->defaultNull()
@@ -69,13 +64,7 @@ final class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->scalarNode('adapter')
-                    ->defaultValue('knp_snappy')
-                ->end()
-                ->scalarNode('factory')
-                    ->defaultNull()
-                ->end()
-                ->variableNode('options')
-                    ->defaultValue([])
+                    ->defaultValue(KnpSnappyAdapter::NAME)
                 ->end()
                 ->scalarNode('pdf_files_directory')
                     ->defaultNull()
