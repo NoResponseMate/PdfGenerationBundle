@@ -1,3 +1,4 @@
 sylius_pdf:
+    pdf_files_directory: '%kernel.cache_dir%/pdf'
     default:
         adapter: knp_snappy

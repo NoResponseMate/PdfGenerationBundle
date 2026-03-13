@@ -27,7 +27,6 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Tests\Sylius\PdfBundle\Functional\Stub\StubCustomAdapter;
-use Twig\Environment;
 
 final class CustomAdapterRegistrationTest extends TestCase
 {
@@ -213,10 +212,6 @@ final class CustomAdapterRegistrationTest extends TestCase
         $container->setDefinition('knp_snappy.pdf', $knpSnappyDefinition);
 
         $container->setDefinition('file_locator', new Definition(\Symfony\Component\Config\FileLocator::class, [[]]));
-
-        $twigDefinition = new Definition(Environment::class);
-        $twigDefinition->setSynthetic(true);
-        $container->setDefinition('twig', $twigDefinition);
 
         $bundle = new SyliusPdfBundle();
         $bundle->build($container);

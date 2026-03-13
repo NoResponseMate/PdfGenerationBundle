@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional\Dompdf;
+namespace Tests\Sylius\PdfBundle\Functional\KnpSnappy;
 
-use Dompdf\Dompdf;
+use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
@@ -21,21 +21,22 @@ use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
 use Sylius\PdfBundle\SyliusPdfBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Tests\Sylius\PdfBundle\Functional\Stub\StubSnappyGenerator;
 
-final class DompdfAdapterTest extends TestCase
+final class KnpSnappyAdapterTest extends TestCase
 {
     public static function setUpBeforeClass(): void
     {
-        if (!class_exists(Dompdf::class)) {
-            self::markTestSkipped('dompdf/dompdf is not installed.');
+        if (!interface_exists(GeneratorInterface::class)) {
+            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
         }
     }
 
     #[Test]
-    public function it_renders_pdf_with_dompdf_as_default_adapter(): void
+    public function it_renders_pdf_with_knp_snappy_as_default_adapter(): void
     {
         $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
+            'default' => ['adapter' => 'knp_snappy'],
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
@@ -46,12 +47,12 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_renders_pdf_with_dompdf_as_context_adapter(): void
+    public function it_renders_pdf_with_knp_snappy_as_context_adapter(): void
     {
         $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'dompdf'],
+                'invoice' => ['adapter' => 'knp_snappy'],
             ],
         ]);
 
@@ -63,24 +64,10 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_renders_pdf_with_dompdf_options(): void
-    {
-        $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
-        ]);
-
-        /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf.renderer.html');
-        $result = $renderer->render('<html><body><p>A4 document</p></body></html>');
-
-        self::assertStringStartsWith('%PDF-', $result);
-    }
-
-    #[Test]
     public function it_renders_separate_pdf_per_call(): void
     {
         $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
+            'default' => ['adapter' => 'knp_snappy'],
         ]);
 
         /** @var HtmlToPdfRendererInterface $renderer */
@@ -95,12 +82,12 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_uses_separate_dompdf_instances_per_context(): void
+    public function it_uses_separate_adapter_instances_per_context(): void
     {
         $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
-                'invoice' => ['adapter' => 'dompdf'],
+                'invoice' => ['adapter' => 'knp_snappy'],
             ],
         ]);
 
@@ -122,6 +109,11 @@ final class DompdfAdapterTest extends TestCase
         $container = new ContainerBuilder();
 
         $container->setParameter('kernel.project_dir', sys_get_temp_dir());
+        $container->setParameter('knp_snappy.pdf.options', []);
+
+        $knpSnappyDefinition = new Definition(GeneratorInterface::class);
+        $knpSnappyDefinition->setSynthetic(true);
+        $container->setDefinition('knp_snappy.pdf', $knpSnappyDefinition);
 
         $container->setDefinition('file_locator', new Definition(\Symfony\Component\Config\FileLocator::class, [[]]));
 
@@ -134,6 +126,8 @@ final class DompdfAdapterTest extends TestCase
         $container->getDefinition('sylius_pdf.renderer.html')->setPublic(true);
 
         $container->compile();
+
+        $container->set('knp_snappy.pdf', new StubSnappyGenerator());
 
         return $container;
     }

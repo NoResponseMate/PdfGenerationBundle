@@ -23,11 +23,12 @@ use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-final class SyliusPdfExtension extends Extension
+final class SyliusPdfExtension extends Extension implements PrependExtensionInterface
 {
     private const BUILT_IN_ADAPTERS = [KnpSnappyAdapter::NAME, DompdfAdapter::NAME];
 
@@ -35,6 +36,13 @@ final class SyliusPdfExtension extends Extension
         KnpSnappyAdapter::NAME => \Knp\Snappy\GeneratorInterface::class,
         DompdfAdapter::NAME => \Dompdf\Dompdf::class,
     ];
+
+    private bool $twigAvailable = false;
+
+    public function prepend(ContainerBuilder $container): void
+    {
+        $this->twigAvailable = $container->hasExtension('twig');
+    }
 
     public function load(array $configs, ContainerBuilder $container): void
     {
@@ -47,6 +55,10 @@ final class SyliusPdfExtension extends Extension
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
         $loader->load('services.php');
+
+        if ($this->twigAvailable) {
+            $loader->load('services_twig.php');
+        }
 
         $adapterReferences = [];
         $deferredAdapterContexts = [];
