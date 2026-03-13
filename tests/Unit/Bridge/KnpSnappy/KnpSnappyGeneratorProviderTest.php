@@ -21,6 +21,13 @@ use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
 final class KnpSnappyGeneratorProviderTest extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!interface_exists(GeneratorInterface::class)) {
+            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
+        }
+    }
+
     #[Test]
     public function it_implements_generator_provider_interface(): void
     {

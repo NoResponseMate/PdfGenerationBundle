@@ -21,6 +21,13 @@ use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
 final class DompdfGeneratorProviderTest extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!class_exists(Dompdf::class)) {
+            self::markTestSkipped('dompdf/dompdf is not installed.');
+        }
+    }
+
     #[Test]
     public function it_implements_generator_provider_interface(): void
     {

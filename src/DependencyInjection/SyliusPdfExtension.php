@@ -31,6 +31,11 @@ final class SyliusPdfExtension extends Extension
 {
     private const BUILT_IN_ADAPTERS = [KnpSnappyAdapter::NAME, DompdfAdapter::NAME];
 
+    private const ADAPTER_REQUIRED_CLASSES = [
+        KnpSnappyAdapter::NAME => \Knp\Snappy\GeneratorInterface::class,
+        DompdfAdapter::NAME => \Dompdf\Dompdf::class,
+    ];
+
     public function load(array $configs, ContainerBuilder $container): void
     {
         /** @var ConfigurationInterface $configuration */
@@ -97,6 +102,17 @@ final class SyliusPdfExtension extends Extension
     ): bool {
         if (!in_array($adapterName, self::BUILT_IN_ADAPTERS, true)) {
             return false;
+        }
+
+        $requiredClass = self::ADAPTER_REQUIRED_CLASSES[$adapterName];
+        if (!class_exists($requiredClass) && !interface_exists($requiredClass)) {
+            throw new \LogicException(sprintf(
+                'The "%s" adapter is configured for the "%s" context, but its required dependency "%s" is not installed. Try running "composer require %s".',
+                $adapterName,
+                $contextName,
+                $requiredClass,
+                KnpSnappyAdapter::NAME === $adapterName ? 'knplabs/knp-snappy-bundle' : 'dompdf/dompdf',
+            ));
         }
 
         $this->loadAdapterServices($loader, $adapterName, $loadedAdapterFiles);

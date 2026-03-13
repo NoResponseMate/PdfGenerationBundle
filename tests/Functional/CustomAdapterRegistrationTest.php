@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Functional;
 
+use Dompdf\Dompdf;
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
@@ -30,6 +31,17 @@ use Twig\Environment;
 
 final class CustomAdapterRegistrationTest extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!class_exists(Dompdf::class)) {
+            self::markTestSkipped('dompdf/dompdf is not installed.');
+        }
+
+        if (!interface_exists(GeneratorInterface::class)) {
+            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
+        }
+    }
+
     #[Test]
     public function it_compiles_container_with_built_in_adapters_only(): void
     {

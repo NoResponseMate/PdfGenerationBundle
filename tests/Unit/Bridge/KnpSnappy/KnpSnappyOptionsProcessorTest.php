@@ -25,6 +25,13 @@ final class KnpSnappyOptionsProcessorTest extends TestCase
 {
     private FileLocatorInterface&MockObject $fileLocator;
 
+    public static function setUpBeforeClass(): void
+    {
+        if (!class_exists(AbstractGenerator::class)) {
+            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
+        }
+    }
+
     protected function setUp(): void
     {
         $this->fileLocator = $this->createMock(FileLocatorInterface::class);

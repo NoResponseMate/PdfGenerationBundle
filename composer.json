@@ -21,6 +21,7 @@
         "phpunit/phpunit": "^10.5",
         "sylius-labs/coding-standard": "^4.4",
         "symfony/console": "^6.4 || ^7.4",
+        "symfony/framework-bundle": "^6.4 || ^7.4",
         "symfony/twig-bundle": "^6.4 || ^7.4"
     },
     "suggest": {

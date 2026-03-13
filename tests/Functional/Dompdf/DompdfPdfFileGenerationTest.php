@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Functional\Dompdf;
 
+use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\Test;
 use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
 use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
@@ -23,6 +24,13 @@ use Tests\Sylius\PdfBundle\Application\Kernel;
 
 final class DompdfPdfFileGenerationTest extends KernelTestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!class_exists(Dompdf::class)) {
+            self::markTestSkipped('dompdf/dompdf is not installed.');
+        }
+    }
+
     private string $pdfDirectory;
 
     protected static function getKernelClass(): string

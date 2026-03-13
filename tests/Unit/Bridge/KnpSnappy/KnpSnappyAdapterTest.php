@@ -30,6 +30,13 @@ final class KnpSnappyAdapterTest extends TestCase
 
     private MockObject&OptionsProcessorInterface $processor;
 
+    public static function setUpBeforeClass(): void
+    {
+        if (!interface_exists(GeneratorInterface::class)) {
+            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
+        }
+    }
+
     protected function setUp(): void
     {
         $this->snappy = $this->createMock(GeneratorInterface::class);

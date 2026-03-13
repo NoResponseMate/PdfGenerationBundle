@@ -22,6 +22,8 @@ jobs:
                 php: ["8.2", "8.3"]
                 symfony: ["^6.4", "^7.4"]
                 scenario:
+                    - full_snappy
+                    - full_dompdf
                     - snappy_with_wkhtmltopdf
                     - snappy_no_wkhtmltopdf
                     - snappy_unavailable
@@ -35,42 +37,54 @@ jobs:
                       symfony: "^6.4"
 
                 include:
+                    - scenario: full_snappy
+                      name: "Full (Snappy default)"
+                      app_env: test_snappy
+                      install_wkhtmltopdf: false
+                      remove_packages: ""
+
+                    - scenario: full_dompdf
+                      name: "Full (Dompdf default)"
+                      app_env: test_dompdf
+                      install_wkhtmltopdf: false
+                      remove_packages: ""
+
                     - scenario: snappy_with_wkhtmltopdf
                       name: "Snappy (wkhtmltopdf)"
                       app_env: test_snappy
                       install_wkhtmltopdf: true
-                      remove_packages: ""
+                      remove_packages: "dompdf/dompdf"
 
                     - scenario: snappy_no_wkhtmltopdf
                       name: "Snappy (no wkhtmltopdf)"
                       app_env: test_snappy
                       install_wkhtmltopdf: false
-                      remove_packages: ""
+                      remove_packages: "dompdf/dompdf"
 
                     - scenario: snappy_unavailable
                       name: "Snappy (unavailable)"
                       app_env: test_snappy
                       install_wkhtmltopdf: false
-                      remove_packages: "knplabs/knp-snappy-bundle"
+                      remove_packages: "knplabs/knp-snappy-bundle dompdf/dompdf"
 
                     - scenario: dompdf
                       name: "Dompdf"
                       app_env: test_dompdf
                       install_wkhtmltopdf: false
-                      remove_packages: ""
+                      remove_packages: "knplabs/knp-snappy-bundle"
 
                     - scenario: dompdf_unavailable
                       name: "Dompdf (unavailable)"
                       app_env: test_dompdf
                       install_wkhtmltopdf: false
-                      remove_packages: "dompdf/dompdf"
+                      remove_packages: "dompdf/dompdf knplabs/knp-snappy-bundle"
 
         env:
             APP_ENV: ${{ matrix.app_env }}
 
         steps:
             -
-                uses: actions/checkout@v4
+                uses: actions/checkout@v6
 
             -
                 name: Setup PHP
@@ -81,7 +95,7 @@ jobs:
 
             -
                 name: Setup cache for wkhtmltopdf
-                uses: actions/cache@v4
+                uses: actions/cache@v6
                 id: cache-wkhtmltopdf
                 if: matrix.install_wkhtmltopdf
                 with:
@@ -103,7 +117,7 @@ jobs:
 
             -
                 name: Cache Composer
-                uses: actions/cache@v4
+                uses: actions/cache@v6
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
                     key: ${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}

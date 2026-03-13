@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Unit\Bridge\Dompdf;
 
+use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
@@ -25,6 +26,13 @@ use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class DompdfAdapterTest extends TestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!class_exists(Dompdf::class)) {
+            self::markTestSkipped('dompdf/dompdf is not installed.');
+        }
+    }
+
     private function createRegistryWithDompdfProvider(): GeneratorProviderRegistryInterface
     {
         $provider = new DompdfGeneratorProvider();
