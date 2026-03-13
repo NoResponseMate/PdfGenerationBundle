@@ -47,12 +47,12 @@ final class FilesystemPdfFileManager implements PdfFileManagerInterface
     {
         $path = $this->resolvePath($filename, $context);
         if (!is_file($path)) {
-            throw new \InvalidArgumentException(sprintf('PDF file "%s" not found.', $filename));
+            throw new \RuntimeException(sprintf('PDF file "%s" not found.', $filename));
         }
 
         $content = file_get_contents($path);
         if (false === $content) {
-            throw new \InvalidArgumentException(sprintf('Could not read PDF file "%s".', $filename));
+            throw new \RuntimeException(sprintf('Could not read PDF file "%s".', $filename));
         }
 
         $file = new PdfFile($filename, $content);
@@ -67,6 +67,10 @@ final class FilesystemPdfFileManager implements PdfFileManagerInterface
             throw new \InvalidArgumentException(sprintf('Unknown PDF context "%s".', $context));
         }
 
-        return $this->contextDirectories[$context] . '/' . $filename;
+        if ($filename !== basename($filename)) {
+            throw new \InvalidArgumentException(sprintf('Invalid PDF filename "%s": directory separators are not allowed.', $filename));
+        }
+
+        return rtrim($this->contextDirectories[$context], \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR . $filename;
     }
 }

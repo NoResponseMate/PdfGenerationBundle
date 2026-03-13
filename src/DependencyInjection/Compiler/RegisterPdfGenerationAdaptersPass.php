@@ -35,8 +35,10 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
 
         $rendererDefinition = $container->getDefinition('sylius_pdf.renderer.html');
 
-        /** @var ServiceLocatorArgument $locatorArgument */
         $locatorArgument = $rendererDefinition->getArgument(0);
+        if (!$locatorArgument instanceof ServiceLocatorArgument) {
+            throw new \LogicException(sprintf('Expected argument 0 of "sylius_pdf.renderer.html" to be a %s, got %s.', ServiceLocatorArgument::class, get_debug_type($locatorArgument)));
+        }
         $existingReferences = $locatorArgument->getValues();
 
         foreach ($deferredContexts as $contextName => $adapterKey) {

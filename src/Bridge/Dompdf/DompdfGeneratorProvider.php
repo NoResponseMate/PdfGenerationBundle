@@ -18,7 +18,7 @@ use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
 final class DompdfGeneratorProvider implements GeneratorProviderInterface
 {
-    public function get(?string $context = null): Dompdf
+    public function get(string $context = 'default'): Dompdf
     {
         return new Dompdf();
     }

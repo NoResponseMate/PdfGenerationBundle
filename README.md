@@ -203,10 +203,10 @@ Generator providers create the underlying PDF library instance (e.g. a `Dompdf` 
 use Sylius\PdfBundle\Core\Attribute\AsPdfGeneratorProvider;
 use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
-#[AsPdfGeneratorProvider(key: 'dompdf', context: 'invoice')]
+#[AsPdfGeneratorProvider(adapter: 'dompdf', context: 'invoice')]
 final class InvoiceDompdfProvider implements GeneratorProviderInterface
 {
-    public function get(?string $context = null): \Dompdf\Dompdf
+    public function get(string $context = 'default'): \Dompdf\Dompdf
     {
         $dompdf = new \Dompdf\Dompdf();
         // Custom setup for the invoice context...
@@ -221,7 +221,7 @@ final class InvoiceDompdfProvider implements GeneratorProviderInterface
 services:
     App\Pdf\InvoiceDompdfProvider:
         tags:
-            - { name: 'sylius_pdf.generator_provider', key: 'dompdf', context: 'invoice' }
+            - { name: 'sylius_pdf.generator_provider', adapter: 'dompdf', context: 'invoice' }
 ```
 
 The `key` must match the adapter name. The optional `context` scopes the provider to a specific context; without it, the provider is used as the default for that adapter.
@@ -239,7 +239,7 @@ use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 #[AsPdfOptionsProcessor(adapter: 'dompdf', context: 'invoice', priority: 10)]
 final class InvoicePaperSizeProcessor implements OptionsProcessorInterface
 {
-    public function process(object $generator): void
+    public function process(object $generator, string $context = 'default')): void
     {
         /** @var \Dompdf\Dompdf $generator */
         $generator->setOptions(new \Dompdf\Options(['defaultPaperSize' => 'a4']));

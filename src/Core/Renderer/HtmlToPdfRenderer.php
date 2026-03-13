@@ -13,13 +13,14 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\Core\Renderer;
 
-use Psr\Container\ContainerInterface;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class HtmlToPdfRenderer implements HtmlToPdfRendererInterface
 {
+    /** @param ServiceLocator<PdfGenerationAdapterInterface> $adapterLocator */
     public function __construct(
-        private readonly ContainerInterface $adapterLocator,
+        private readonly ServiceLocator $adapterLocator,
     ) {
     }
 
@@ -29,8 +30,10 @@ final class HtmlToPdfRenderer implements HtmlToPdfRendererInterface
             throw new \InvalidArgumentException(sprintf('Unknown PDF generation context "%s".', $context));
         }
 
-        /** @var PdfGenerationAdapterInterface $adapter */
         $adapter = $this->adapterLocator->get($context);
+        if (!$adapter instanceof PdfGenerationAdapterInterface) {
+            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, got %s.', PdfGenerationAdapterInterface::class, get_debug_type($adapter)));
+        }
 
         return $adapter->generate($html);
     }

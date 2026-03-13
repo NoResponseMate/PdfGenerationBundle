@@ -146,8 +146,14 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
         string $contextName,
         string $adapterName,
     ): void {
+        $parentId = sprintf('sylius_pdf.options_processor.%s', $adapterName);
+
+        if (!$container->hasDefinition($parentId)) {
+            return;
+        }
+
         $processorServiceId = sprintf('sylius_pdf.options_processor.%s.%s', $adapterName, $contextName);
-        $processorDefinition = new ChildDefinition(sprintf('sylius_pdf.options_processor.%s', $adapterName));
+        $processorDefinition = new ChildDefinition($parentId);
 
         $tagAttributes = ['adapter' => $adapterName];
         if ('default' !== $contextName) {

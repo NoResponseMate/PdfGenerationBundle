@@ -45,7 +45,7 @@ final class RegisterGeneratorProvidersPass implements CompilerPassInterface
                 }
 
                 $key = $attributes['adapter'];
-                $context = isset($attributes['context']) && is_string($attributes['context']) && '' !== $attributes['context']
+                $context = isset($attributes['context']) && is_string($attributes['context']) && '' !== $attributes['context'] && 'default' !== $attributes['context']
                     ? $attributes['context']
                     : null;
 

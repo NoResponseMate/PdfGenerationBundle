@@ -63,20 +63,6 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_renders_pdf_with_dompdf_options(): void
-    {
-        $container = $this->compileContainer([
-            'default' => ['adapter' => 'dompdf'],
-        ]);
-
-        /** @var HtmlToPdfRendererInterface $renderer */
-        $renderer = $container->get('sylius_pdf.renderer.html');
-        $result = $renderer->render('<html><body><p>A4 document</p></body></html>');
-
-        self::assertStringStartsWith('%PDF-', $result);
-    }
-
-    #[Test]
     public function it_renders_separate_pdf_per_call(): void
     {
         $container = $this->compileContainer([

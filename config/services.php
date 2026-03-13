@@ -27,7 +27,11 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    $services->set('sylius_pdf.renderer.html', HtmlToPdfRenderer::class);
+    $services->set('sylius_pdf.renderer.html', HtmlToPdfRenderer::class)
+        ->args([
+            abstract_arg('adapter service locator, set by SyliusPdfExtension'),
+        ])
+    ;
     $services->alias(HtmlToPdfRendererInterface::class, 'sylius_pdf.renderer.html');
 
     $services->set('sylius_pdf.manager.filesystem', FilesystemPdfFileManager::class)

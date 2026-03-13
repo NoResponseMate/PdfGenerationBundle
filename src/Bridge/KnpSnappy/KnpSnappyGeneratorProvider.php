@@ -13,16 +13,16 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\Bridge\KnpSnappy;
 
-use Knp\Snappy\GeneratorInterface;
+use Knp\Snappy\AbstractGenerator;
 use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
 final class KnpSnappyGeneratorProvider implements GeneratorProviderInterface
 {
-    /** @var \Closure(): GeneratorInterface */
+    /** @var \Closure(): AbstractGenerator */
     private readonly \Closure $snappyFactory;
 
     /**
-     * @param \Closure(): GeneratorInterface $snappyFactory
+     * @param \Closure(): AbstractGenerator $snappyFactory
      */
     public function __construct(
         \Closure $snappyFactory,
@@ -30,7 +30,7 @@ final class KnpSnappyGeneratorProvider implements GeneratorProviderInterface
         $this->snappyFactory = $snappyFactory;
     }
 
-    public function get(?string $context = null): GeneratorInterface
+    public function get(string $context = 'default'): AbstractGenerator
     {
         return ($this->snappyFactory)();
     }

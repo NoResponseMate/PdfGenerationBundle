@@ -31,8 +31,10 @@ final class DompdfAdapter implements PdfGenerationAdapterInterface
 
     public function generate(string $html): string
     {
-        /** @var Dompdf $dompdf */
         $dompdf = $this->generatorProviderRegistry->get(self::NAME, $this->context);
+        if (!$dompdf instanceof Dompdf) {
+            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, got %s.', Dompdf::class, get_debug_type($dompdf)));
+        }
         $this->optionsProcessor->process($dompdf, $this->context);
         $dompdf->loadHtml($html);
         $dompdf->render();

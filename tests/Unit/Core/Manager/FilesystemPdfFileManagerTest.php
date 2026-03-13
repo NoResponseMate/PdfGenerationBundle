@@ -98,7 +98,7 @@ final class FilesystemPdfFileManagerTest extends TestCase
     #[Test]
     public function it_throws_an_exception_when_getting_a_non_existent_file(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('PDF file "non_existent.pdf" not found.');
 
         $this->manager->get('non_existent.pdf');
@@ -154,5 +154,23 @@ final class FilesystemPdfFileManagerTest extends TestCase
         $this->expectExceptionMessage('Unknown PDF context "unknown".');
 
         $this->manager->save(new PdfFile('report.pdf', 'PDF content'), 'unknown');
+    }
+
+    #[Test]
+    public function it_rejects_filenames_with_directory_traversal(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid PDF filename "../../etc/passwd": directory separators are not allowed.');
+
+        $this->manager->save(new PdfFile('../../etc/passwd', 'malicious content'));
+    }
+
+    #[Test]
+    public function it_rejects_filenames_with_directory_separators(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('directory separators are not allowed');
+
+        $this->manager->has('subdir/file.pdf');
     }
 }

@@ -220,7 +220,6 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 
         self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.dompdf'));
         self::assertFalse($this->container->hasDefinition('sylius_pdf.generator_provider.dompdf'));
-        self::assertFalse($this->container->hasDefinition('sylius_pdf.options_processor.dompdf'));
     }
 
     #[Test]

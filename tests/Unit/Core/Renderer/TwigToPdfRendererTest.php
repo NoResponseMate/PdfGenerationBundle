@@ -27,13 +27,16 @@ final class TwigToPdfRendererTest extends TestCase
 
     private HtmlToPdfRendererInterface&MockObject $htmlToPdfRenderer;
 
+    protected function setUp(): void
+    {
+        $this->twig = $this->createMock(Environment::class);
+        $this->htmlToPdfRenderer = $this->createMock(HtmlToPdfRendererInterface::class);
+    }
+
     #[Test]
     public function it_implements_twig_to_pdf_renderer_interface(): void
     {
-        $renderer = new TwigToPdfRenderer(
-            $this->createMock(Environment::class),
-            $this->createMock(HtmlToPdfRendererInterface::class),
-        );
+        $renderer = new TwigToPdfRenderer($this->twig, $this->htmlToPdfRenderer);
 
         self::assertInstanceOf(TwigToPdfRendererInterface::class, $renderer);
     }
@@ -41,9 +44,6 @@ final class TwigToPdfRendererTest extends TestCase
     #[Test]
     public function it_renders_twig_template_to_pdf(): void
     {
-        $this->twig = $this->createMock(Environment::class);
-        $this->htmlToPdfRenderer = $this->createMock(HtmlToPdfRendererInterface::class);
-
         $renderer = new TwigToPdfRenderer($this->twig, $this->htmlToPdfRenderer);
 
         $this->twig
@@ -66,9 +66,6 @@ final class TwigToPdfRendererTest extends TestCase
     #[Test]
     public function it_renders_twig_template_to_pdf_with_no_parameters(): void
     {
-        $this->twig = $this->createMock(Environment::class);
-        $this->htmlToPdfRenderer = $this->createMock(HtmlToPdfRendererInterface::class);
-
         $renderer = new TwigToPdfRenderer($this->twig, $this->htmlToPdfRenderer);
 
         $this->twig
@@ -91,9 +88,6 @@ final class TwigToPdfRendererTest extends TestCase
     #[Test]
     public function it_forwards_context_parameter_to_html_renderer(): void
     {
-        $this->twig = $this->createMock(Environment::class);
-        $this->htmlToPdfRenderer = $this->createMock(HtmlToPdfRendererInterface::class);
-
         $renderer = new TwigToPdfRenderer($this->twig, $this->htmlToPdfRenderer);
 
         $this->twig

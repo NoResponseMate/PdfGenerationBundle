@@ -15,36 +15,21 @@ namespace Sylius\PdfBundle\Bridge\KnpSnappy;
 
 use Knp\Snappy\AbstractGenerator;
 use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
-use Symfony\Component\Config\FileLocatorInterface;
 
 final class KnpSnappyOptionsProcessor implements OptionsProcessorInterface
 {
-    /**
-     * @param array<string, mixed> $knpSnappyOptions
-     * @param list<string> $allowedFiles
-     */
+    /** @param array<string, mixed> $knpSnappyOptions */
     public function __construct(
-        private readonly FileLocatorInterface $fileLocator,
         private readonly array $knpSnappyOptions,
-        private readonly array $allowedFiles = [],
     ) {
     }
 
     public function process(object $generator, string $context = 'default'): void
     {
-        /** @var AbstractGenerator $generator */
-        $generator->setOptions($this->knpSnappyOptions);
-
-        if ([] === $this->allowedFiles) {
-            return;
+        if (!$generator instanceof AbstractGenerator) {
+            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, got %s.', AbstractGenerator::class, get_debug_type($generator)));
         }
 
-        $generator->setOption(
-            'allow',
-            array_map(
-                fn (string $file): string => $this->fileLocator->locate($file),
-                $this->allowedFiles,
-            ),
-        );
+        $generator->setOptions($this->knpSnappyOptions);
     }
 }

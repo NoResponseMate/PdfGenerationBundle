@@ -15,10 +15,10 @@ namespace Tests\Sylius\PdfBundle\Unit\Core\Renderer;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class HtmlToPdfRendererTest extends TestCase
 {
@@ -26,7 +26,7 @@ final class HtmlToPdfRendererTest extends TestCase
     public function it_implements_html_to_pdf_renderer_interface(): void
     {
         $renderer = new HtmlToPdfRenderer(
-            $this->createMock(ContainerInterface::class),
+            new ServiceLocator([]),
         );
 
         self::assertInstanceOf(HtmlToPdfRendererInterface::class, $renderer);
@@ -42,9 +42,9 @@ final class HtmlToPdfRendererTest extends TestCase
             ->with('<html>Hello</html>')
             ->willReturn('PDF FILE');
 
-        $locator = $this->createMock(ContainerInterface::class);
-        $locator->method('has')->with('default')->willReturn(true);
-        $locator->method('get')->with('default')->willReturn($adapter);
+        $locator = new ServiceLocator([
+            'default' => fn () => $adapter,
+        ]);
 
         $renderer = new HtmlToPdfRenderer($locator);
 
@@ -63,9 +63,9 @@ final class HtmlToPdfRendererTest extends TestCase
             ->with('<html>Invoice</html>')
             ->willReturn('INVOICE PDF');
 
-        $locator = $this->createMock(ContainerInterface::class);
-        $locator->method('has')->with('invoice')->willReturn(true);
-        $locator->method('get')->with('invoice')->willReturn($adapter);
+        $locator = new ServiceLocator([
+            'invoice' => fn () => $adapter,
+        ]);
 
         $renderer = new HtmlToPdfRenderer($locator);
 
@@ -77,10 +77,7 @@ final class HtmlToPdfRendererTest extends TestCase
     #[Test]
     public function it_throws_for_unknown_context(): void
     {
-        $locator = $this->createMock(ContainerInterface::class);
-        $locator->method('has')->with('unknown')->willReturn(false);
-
-        $renderer = new HtmlToPdfRenderer($locator);
+        $renderer = new HtmlToPdfRenderer(new ServiceLocator([]));
 
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unknown PDF generation context "unknown".');

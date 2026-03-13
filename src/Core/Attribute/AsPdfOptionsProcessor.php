@@ -18,7 +18,7 @@ final readonly class AsPdfOptionsProcessor
 {
     public function __construct(
         public string $adapter,
-        public ?string $context = null,
+        public string $context = 'default',
         public int $priority = 0,
     ) {
     }

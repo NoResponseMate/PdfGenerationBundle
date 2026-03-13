@@ -15,5 +15,5 @@ namespace Sylius\PdfBundle\Core\Provider;
 
 interface GeneratorProviderInterface
 {
-    public function get(?string $context = null): object;
+    public function get(string $context = 'default'): object;
 }

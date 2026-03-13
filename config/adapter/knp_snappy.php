@@ -34,7 +34,6 @@ return static function (ContainerConfigurator $container): void {
 
     $services->set('sylius_pdf.options_processor.knp_snappy', KnpSnappyOptionsProcessor::class)
         ->args([
-            service('file_locator'),
             param('knp_snappy.pdf.options'),
         ])
         ->abstract()

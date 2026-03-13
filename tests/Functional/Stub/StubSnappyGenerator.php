@@ -13,15 +13,23 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Functional\Stub;
 
-use Knp\Snappy\GeneratorInterface;
+use Knp\Snappy\AbstractGenerator;
 
 /**
  * Stub that replaces the real wkhtmltopdf-backed generator in tests.
- * Implements GeneratorInterface and adds setOptions/setOption methods
- * needed by KnpSnappyOptionsProcessor (which casts to AbstractGenerator).
+ * Extends AbstractGenerator so it passes instanceof checks in KnpSnappyOptionsProcessor.
  */
-final class StubSnappyGenerator implements GeneratorInterface
+final class StubSnappyGenerator extends AbstractGenerator
 {
+    public function __construct()
+    {
+        parent::__construct('/usr/bin/true');
+    }
+
+    protected function configure(): void
+    {
+    }
+
     /**
      * @param array<string>|string $input
      * @param array<string, mixed> $options
@@ -54,14 +62,5 @@ final class StubSnappyGenerator implements GeneratorInterface
     public function getOutputFromHtml($html, array $options = []): string
     {
         return '%PDF-1.4 stub ' . md5(is_array($html) ? implode('', $html) : $html);
-    }
-
-    /** @param array<string, mixed> $options */
-    public function setOptions(array $options): void
-    {
-    }
-
-    public function setOption(string $name, mixed $value): void
-    {
     }
 }

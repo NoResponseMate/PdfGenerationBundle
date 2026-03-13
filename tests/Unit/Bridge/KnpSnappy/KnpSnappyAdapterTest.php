@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Unit\Bridge\KnpSnappy;
 
+use Knp\Snappy\AbstractGenerator;
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -24,7 +25,7 @@ use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 
 final class KnpSnappyAdapterTest extends TestCase
 {
-    private GeneratorInterface&MockObject $snappy;
+    private AbstractGenerator&MockObject $snappy;
 
     private GeneratorProviderRegistryInterface&MockObject $generatorProviderRegistry;
 
@@ -39,7 +40,7 @@ final class KnpSnappyAdapterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->snappy = $this->createMock(GeneratorInterface::class);
+        $this->snappy = $this->createMock(AbstractGenerator::class);
         $this->generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
         $this->generatorProviderRegistry->method('get')->willReturn($this->snappy);
         $this->processor = $this->createMock(OptionsProcessorInterface::class);

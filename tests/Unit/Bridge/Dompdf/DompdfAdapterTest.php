@@ -15,17 +15,21 @@ namespace Tests\Sylius\PdfBundle\Unit\Bridge\Dompdf;
 
 use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
-use Sylius\PdfBundle\Bridge\Dompdf\DompdfGeneratorProvider;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class DompdfAdapterTest extends TestCase
 {
+    private GeneratorProviderRegistryInterface&MockObject $generatorProviderRegistry;
+
+    private MockObject&OptionsProcessorInterface $processor;
+
+    private Dompdf&MockObject $dompdf;
+
     public static function setUpBeforeClass(): void
     {
         if (!class_exists(Dompdf::class)) {
@@ -33,21 +37,19 @@ final class DompdfAdapterTest extends TestCase
         }
     }
 
-    private function createRegistryWithDompdfProvider(): GeneratorProviderRegistryInterface
+    protected function setUp(): void
     {
-        $provider = new DompdfGeneratorProvider();
-
-        return new GeneratorProviderRegistry(new ServiceLocator([
-            'dompdf' => static fn () => $provider,
-        ]));
+        $this->dompdf = $this->createMock(Dompdf::class);
+        $this->generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
+        $this->processor = $this->createMock(OptionsProcessorInterface::class);
     }
 
     #[Test]
     public function it_implements_pdf_generation_adapter_interface(): void
     {
         $adapter = new DompdfAdapter(
-            $this->createRegistryWithDompdfProvider(),
-            $this->createMock(OptionsProcessorInterface::class),
+            $this->generatorProviderRegistry,
+            $this->processor,
             'default',
         );
 
@@ -55,52 +57,46 @@ final class DompdfAdapterTest extends TestCase
     }
 
     #[Test]
-    public function it_generates_pdf_from_html(): void
-    {
-        $adapter = new DompdfAdapter(
-            $this->createRegistryWithDompdfProvider(),
-            $this->createMock(OptionsProcessorInterface::class),
-            'default',
-        );
-
-        $result = $adapter->generate('<html><body>Hello</body></html>');
-
-        self::assertStringStartsWith('%PDF-', $result);
-    }
-
-    #[Test]
     public function it_delegates_to_registry_to_get_generator(): void
     {
-        $generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
-        $generatorProviderRegistry
+        $this->generatorProviderRegistry
             ->expects(self::once())
             ->method('get')
             ->with('dompdf', 'invoice')
-            ->willReturn(new \Dompdf\Dompdf());
+            ->willReturn($this->dompdf);
+
+        $this->dompdf->expects(self::once())->method('loadHtml')->with('<html><body>Hello</body></html>');
+        $this->dompdf->expects(self::once())->method('render');
+        $this->dompdf->expects(self::once())->method('output')->willReturn('PDF CONTENT');
 
         $adapter = new DompdfAdapter(
-            $generatorProviderRegistry,
-            $this->createMock(OptionsProcessorInterface::class),
+            $this->generatorProviderRegistry,
+            $this->processor,
             'invoice',
         );
 
         $result = $adapter->generate('<html><body>Hello</body></html>');
 
-        self::assertStringStartsWith('%PDF-', $result);
+        self::assertSame('PDF CONTENT', $result);
     }
 
     #[Test]
     public function it_calls_options_processor_with_generator_and_context(): void
     {
-        $processor = $this->createMock(OptionsProcessorInterface::class);
-        $processor
+        $this->generatorProviderRegistry
+            ->method('get')
+            ->willReturn($this->dompdf);
+
+        $this->dompdf->method('output')->willReturn('PDF CONTENT');
+
+        $this->processor
             ->expects(self::once())
             ->method('process')
-            ->with(self::isInstanceOf(\Dompdf\Dompdf::class), 'invoice');
+            ->with($this->dompdf, 'invoice');
 
         $adapter = new DompdfAdapter(
-            $this->createRegistryWithDompdfProvider(),
-            $processor,
+            $this->generatorProviderRegistry,
+            $this->processor,
             'invoice',
         );
 

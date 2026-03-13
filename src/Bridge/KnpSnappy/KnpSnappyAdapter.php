@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\Bridge\KnpSnappy;
 
-use Knp\Snappy\GeneratorInterface;
+use Knp\Snappy\AbstractGenerator;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
@@ -31,8 +31,10 @@ final class KnpSnappyAdapter implements PdfGenerationAdapterInterface
 
     public function generate(string $html): string
     {
-        /** @var GeneratorInterface $generator */
         $generator = $this->generatorProviderRegistry->get(self::NAME, $this->context);
+        if (!$generator instanceof AbstractGenerator) {
+            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, got %s.', AbstractGenerator::class, get_debug_type($generator)));
+        }
         $this->optionsProcessor->process($generator, $this->context);
 
         return $generator->getOutputFromHtml($html);
