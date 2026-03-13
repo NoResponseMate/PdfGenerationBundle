@@ -23,7 +23,7 @@ return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
     $services->set('sylius_pdf.generator_provider.dompdf', DompdfGeneratorProvider::class)
-        ->tag('sylius_pdf.generator_provider', ['key' => DompdfAdapter::NAME])
+        ->tag('sylius_pdf.generator_provider', ['adapter' => DompdfAdapter::NAME])
     ;
 
     $services->set('sylius_pdf.options_processor.dompdf', DompdfOptionsProcessor::class)

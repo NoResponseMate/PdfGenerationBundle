@@ -57,7 +57,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
         $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
 
         $providerDefinition = new Definition(GeneratorProviderInterface::class);
-        $providerDefinition->addTag('sylius_pdf.generator_provider', ['key' => 'dompdf']);
+        $providerDefinition->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf']);
         $container->setDefinition('app.my_provider', $providerDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
@@ -80,7 +80,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
         $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
 
         $providerDefinition = new Definition(GeneratorProviderInterface::class);
-        $providerDefinition->addTag('sylius_pdf.generator_provider', ['key' => 'dompdf', 'context' => 'invoice']);
+        $providerDefinition->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf', 'context' => 'invoice']);
         $container->setDefinition('app.my_provider', $providerDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
@@ -94,7 +94,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     }
 
     #[Test]
-    public function it_throws_when_key_attribute_is_missing(): void
+    public function it_throws_when_adapter_attribute_is_missing(): void
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
@@ -107,7 +107,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
         $pass = new RegisterGeneratorProvidersPass();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "app.my_provider" tagged with "sylius_pdf.generator_provider" must have a "key" attribute.');
+        $this->expectExceptionMessage('The service "app.my_provider" tagged with "sylius_pdf.generator_provider" must have an "adapter" attribute.');
 
         $pass->process($container);
     }
@@ -120,11 +120,11 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
         $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
 
         $provider1 = new Definition(GeneratorProviderInterface::class);
-        $provider1->addTag('sylius_pdf.generator_provider', ['key' => 'dompdf']);
+        $provider1->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf']);
         $container->setDefinition('app.provider1', $provider1);
 
         $provider2 = new Definition(GeneratorProviderInterface::class);
-        $provider2->addTag('sylius_pdf.generator_provider', ['key' => 'knp_snappy']);
+        $provider2->addTag('sylius_pdf.generator_provider', ['adapter' => 'knp_snappy']);
         $container->setDefinition('app.provider2', $provider2);
 
         $pass = new RegisterGeneratorProvidersPass();

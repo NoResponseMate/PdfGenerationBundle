@@ -37,14 +37,14 @@ final class RegisterGeneratorProvidersPass implements CompilerPassInterface
 
         foreach ($taggedServices as $serviceId => $tags) {
             foreach ($tags as $attributes) {
-                if (!isset($attributes['key']) || !is_string($attributes['key']) || '' === $attributes['key']) {
+                if (!isset($attributes['adapter']) || !is_string($attributes['adapter']) || '' === $attributes['adapter']) {
                     throw new \InvalidArgumentException(sprintf(
-                        'The service "%s" tagged with "sylius_pdf.generator_provider" must have a "key" attribute.',
+                        'The service "%s" tagged with "sylius_pdf.generator_provider" must have an "adapter" attribute.',
                         $serviceId,
                     ));
                 }
 
-                $key = $attributes['key'];
+                $key = $attributes['adapter'];
                 $context = isset($attributes['context']) && is_string($attributes['context']) && '' !== $attributes['context']
                     ? $attributes['context']
                     : null;

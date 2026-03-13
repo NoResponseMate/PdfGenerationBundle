@@ -46,7 +46,7 @@ final class SyliusPdfBundle extends Bundle
             AsPdfGeneratorProvider::class,
             static function (ChildDefinition $definition, AsPdfGeneratorProvider $attribute): void {
                 $definition->addTag('sylius_pdf.generator_provider', [
-                    'key' => $attribute->key,
+                    'adapter' => $attribute->adapter,
                     'context' => $attribute->context,
                 ]);
             },

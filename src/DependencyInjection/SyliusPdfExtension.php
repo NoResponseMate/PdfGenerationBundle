@@ -64,7 +64,7 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
         $deferredAdapterContexts = [];
         $loadedAdapterFiles = [];
 
-        if ($this->registerAdapter($container, $loader, 'default', $config['default']['adapter'], $config['default']['options'] ?? [], $loadedAdapterFiles)) {
+        if ($this->registerAdapter($container, $loader, 'default', $config['default']['adapter'], $loadedAdapterFiles)) {
             $adapterReferences['default'] = new Reference('sylius_pdf.adapter.default');
             $container->setAlias(PdfGenerationAdapterInterface::class, 'sylius_pdf.adapter.default');
         } else {
@@ -78,7 +78,7 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
         foreach ($config['contexts'] as $contextName => $contextConfig) {
             $contextName = (string) $contextName;
 
-            if ($this->registerAdapter($container, $loader, $contextName, $contextConfig['adapter'], $contextConfig['options'] ?? [], $loadedAdapterFiles)) {
+            if ($this->registerAdapter($container, $loader, $contextName, $contextConfig['adapter'], $loadedAdapterFiles)) {
                 $adapterReferences[$contextName] = new Reference(sprintf('sylius_pdf.adapter.%s', $contextName));
             } else {
                 $deferredAdapterContexts[$contextName] = $contextConfig['adapter'];
@@ -101,7 +101,6 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
     }
 
     /**
-     * @param array<string, mixed> $options
      * @param array<string, true> $loadedAdapterFiles
      */
     private function registerAdapter(
@@ -109,7 +108,6 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
         PhpFileLoader $loader,
         string $contextName,
         string $adapterName,
-        array $options,
         array &$loadedAdapterFiles,
     ): bool {
         if (!in_array($adapterName, self::BUILT_IN_ADAPTERS, true)) {
@@ -138,30 +136,18 @@ final class SyliusPdfExtension extends Extension implements PrependExtensionInte
                 ->replaceArgument('$context', $contextName),
         );
 
-        $this->registerProcessor($container, $contextName, $adapterName, $options);
+        $this->registerProcessor($container, $contextName, $adapterName);
 
         return true;
     }
 
-    /**
-     * @param array<string, mixed> $options
-     */
     private function registerProcessor(
         ContainerBuilder $container,
         string $contextName,
         string $adapterName,
-        array $options,
     ): void {
         $processorServiceId = sprintf('sylius_pdf.options_processor.%s.%s', $adapterName, $contextName);
         $processorDefinition = new ChildDefinition(sprintf('sylius_pdf.options_processor.%s', $adapterName));
-
-        if (KnpSnappyAdapter::NAME === $adapterName) {
-            $processorDefinition->setArgument('$allowedFiles', $options['allowed_files'] ?? []);
-        }
-
-        if (DompdfAdapter::NAME === $adapterName) {
-            $processorDefinition->setArgument('$options', $options);
-        }
 
         $tagAttributes = ['adapter' => $adapterName];
         if ('default' !== $contextName) {

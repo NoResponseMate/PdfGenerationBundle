@@ -29,7 +29,7 @@ return static function (ContainerConfigurator $container): void {
         ->args([
             service_closure(RegisterKnpSnappyPrototypePass::PROTOTYPE_SERVICE_ID),
         ])
-        ->tag('sylius_pdf.generator_provider', ['key' => KnpSnappyAdapter::NAME])
+        ->tag('sylius_pdf.generator_provider', ['adapter' => KnpSnappyAdapter::NAME])
     ;
 
     $services->set('sylius_pdf.options_processor.knp_snappy', KnpSnappyOptionsProcessor::class)
