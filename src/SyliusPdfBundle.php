@@ -17,6 +17,7 @@ use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
 use Sylius\PdfBundle\Core\Attribute\AsPdfGeneratorProvider;
 use Sylius\PdfBundle\Core\Attribute\AsPdfOptionsProcessor;
 use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterGeneratorProvidersPass;
+use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterKnpSnappyPrototypePass;
 use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterOptionsProcessorsPass;
 use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterPdfGenerationAdaptersPass;
 use Symfony\Component\DependencyInjection\ChildDefinition;
@@ -62,6 +63,7 @@ final class SyliusPdfBundle extends Bundle
             },
         );
 
+        $container->addCompilerPass(new RegisterKnpSnappyPrototypePass());
         $container->addCompilerPass(new RegisterGeneratorProvidersPass());
         $container->addCompilerPass(new RegisterOptionsProcessorsPass());
         $container->addCompilerPass(new RegisterPdfGenerationAdaptersPass());

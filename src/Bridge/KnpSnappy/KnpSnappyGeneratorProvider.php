@@ -18,13 +18,20 @@ use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
 
 final class KnpSnappyGeneratorProvider implements GeneratorProviderInterface
 {
+    /** @var \Closure(): GeneratorInterface */
+    private readonly \Closure $snappyFactory;
+
+    /**
+     * @param \Closure(): GeneratorInterface $snappyFactory
+     */
     public function __construct(
-        private readonly GeneratorInterface $snappy,
+        \Closure $snappyFactory,
     ) {
+        $this->snappyFactory = $snappyFactory;
     }
 
     public function get(?string $context = null): GeneratorInterface
     {
-        return $this->snappy;
+        return ($this->snappyFactory)();
     }
 }

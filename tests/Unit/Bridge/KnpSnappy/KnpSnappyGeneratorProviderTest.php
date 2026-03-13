@@ -31,8 +31,7 @@ final class KnpSnappyGeneratorProviderTest extends TestCase
     #[Test]
     public function it_implements_generator_provider_interface(): void
     {
-        $snappy = $this->createMock(GeneratorInterface::class);
-        $provider = new KnpSnappyGeneratorProvider($snappy);
+        $provider = new KnpSnappyGeneratorProvider(fn () => $this->createMock(GeneratorInterface::class));
 
         self::assertInstanceOf(GeneratorProviderInterface::class, $provider);
     }
@@ -41,7 +40,7 @@ final class KnpSnappyGeneratorProviderTest extends TestCase
     public function it_returns_the_snappy_generator(): void
     {
         $snappy = $this->createMock(GeneratorInterface::class);
-        $provider = new KnpSnappyGeneratorProvider($snappy);
+        $provider = new KnpSnappyGeneratorProvider(fn () => $snappy);
 
         $result = $provider->get('default');
 
@@ -49,11 +48,10 @@ final class KnpSnappyGeneratorProviderTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_same_instance_regardless_of_context(): void
+    public function it_returns_fresh_instance_for_each_call(): void
     {
-        $snappy = $this->createMock(GeneratorInterface::class);
-        $provider = new KnpSnappyGeneratorProvider($snappy);
+        $provider = new KnpSnappyGeneratorProvider(fn () => $this->createMock(GeneratorInterface::class));
 
-        self::assertSame($provider->get('default'), $provider->get('invoice'));
+        self::assertNotSame($provider->get('default'), $provider->get('invoice'));
     }
 }

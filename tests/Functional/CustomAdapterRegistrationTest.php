@@ -27,6 +27,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Tests\Sylius\PdfBundle\Functional\Stub\StubCustomAdapter;
+use Tests\Sylius\PdfBundle\Functional\Stub\StubSnappyGenerator;
 
 final class CustomAdapterRegistrationTest extends TestCase
 {
@@ -207,8 +208,7 @@ final class CustomAdapterRegistrationTest extends TestCase
         $container->setParameter('kernel.project_dir', sys_get_temp_dir());
         $container->setParameter('knp_snappy.pdf.options', []);
 
-        $knpSnappyDefinition = new Definition(GeneratorInterface::class);
-        $knpSnappyDefinition->setSynthetic(true);
+        $knpSnappyDefinition = new Definition(StubSnappyGenerator::class);
         $container->setDefinition('knp_snappy.pdf', $knpSnappyDefinition);
 
         $container->setDefinition('file_locator', new Definition(\Symfony\Component\Config\FileLocator::class, [[]]));
