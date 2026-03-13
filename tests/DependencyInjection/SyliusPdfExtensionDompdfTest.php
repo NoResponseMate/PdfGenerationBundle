@@ -91,7 +91,7 @@ final class SyliusPdfExtensionDompdfTest extends AbstractExtensionTestCase
         self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.invoice'));
 
         /** @var array<string, string> $deferred */
-        $deferred = $this->container->getParameter('sylius_pdf.deferred_adapter_contexts');
+        $deferred = $this->container->getParameter('.sylius_pdf.deferred_adapter_contexts');
         self::assertSame(['invoice' => 'my_custom'], $deferred);
     }
 
@@ -156,7 +156,7 @@ final class SyliusPdfExtensionDompdfTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        self::assertFalse($this->container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
+        self::assertFalse($this->container->hasParameter('.sylius_pdf.deferred_adapter_contexts'));
     }
 
     #[Test]

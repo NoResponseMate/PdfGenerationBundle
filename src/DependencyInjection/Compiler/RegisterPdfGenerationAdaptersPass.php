@@ -23,12 +23,12 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasParameter('sylius_pdf.deferred_adapter_contexts')) {
+        if (!$container->hasParameter('.sylius_pdf.deferred_adapter_contexts')) {
             return;
         }
 
         /** @var array<string, string> $deferredContexts */
-        $deferredContexts = $container->getParameter('sylius_pdf.deferred_adapter_contexts');
+        $deferredContexts = $container->getParameter('.sylius_pdf.deferred_adapter_contexts');
 
         $taggedServices = $container->findTaggedServiceIds('sylius_pdf.adapter');
         $adapterMap = $this->buildAdapterMap($taggedServices);
@@ -61,8 +61,6 @@ final class RegisterPdfGenerationAdaptersPass implements CompilerPassInterface
                 $adapterMap[$deferredContexts['default']],
             );
         }
-
-        $container->getParameterBag()->remove('sylius_pdf.deferred_adapter_contexts');
     }
 
     /**

@@ -6,8 +6,7 @@ on:
     release:
         types: [created]
     schedule:
-        -
-            cron: "0 1 * * 6" # Run at 1am every Saturday
+        -   cron: "0 1 * * 6" # Run at 1am every Saturday
     workflow_dispatch: ~
 
 jobs:
@@ -31,70 +30,67 @@ jobs:
                     - dompdf_unavailable
 
                 exclude:
-                    - php: "8.2"
-                      symfony: "^7.4"
-                    - php: "8.3"
-                      symfony: "^6.4"
+                    -   php: "8.2"
+                        symfony: "^7.4"
+                    -   php: "8.3"
+                        symfony: "^6.4"
 
                 include:
-                    - scenario: full_snappy
-                      name: "Full (Snappy default)"
-                      app_env: test_snappy
-                      install_wkhtmltopdf: false
-                      remove_packages: ""
+                    -   scenario: full_snappy
+                        name: "Full (Snappy default)"
+                        app_env: test_snappy
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
 
-                    - scenario: full_dompdf
-                      name: "Full (Dompdf default)"
-                      app_env: test_dompdf
-                      install_wkhtmltopdf: false
-                      remove_packages: ""
+                    -   scenario: full_dompdf
+                        name: "Full (Dompdf default)"
+                        app_env: test_dompdf
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
 
-                    - scenario: snappy_with_wkhtmltopdf
-                      name: "Snappy (wkhtmltopdf)"
-                      app_env: test_snappy
-                      install_wkhtmltopdf: true
-                      remove_packages: "dompdf/dompdf"
+                    -   scenario: snappy_with_wkhtmltopdf
+                        name: "Snappy (wkhtmltopdf)"
+                        app_env: test_snappy
+                        install_wkhtmltopdf: true
+                        remove_packages: "dompdf/dompdf"
 
-                    - scenario: snappy_no_wkhtmltopdf
-                      name: "Snappy (no wkhtmltopdf)"
-                      app_env: test_snappy
-                      install_wkhtmltopdf: false
-                      remove_packages: "dompdf/dompdf"
+                    -   scenario: snappy_no_wkhtmltopdf
+                        name: "Snappy (no wkhtmltopdf)"
+                        app_env: test_snappy
+                        install_wkhtmltopdf: false
+                        remove_packages: "dompdf/dompdf"
 
-                    - scenario: snappy_unavailable
-                      name: "Snappy (unavailable)"
-                      app_env: test_snappy
-                      install_wkhtmltopdf: false
-                      remove_packages: "knplabs/knp-snappy-bundle dompdf/dompdf"
+                    -   scenario: snappy_unavailable
+                        name: "Snappy (unavailable)"
+                        app_env: test_snappy
+                        install_wkhtmltopdf: false
+                        remove_packages: "knplabs/knp-snappy-bundle dompdf/dompdf"
 
-                    - scenario: dompdf
-                      name: "Dompdf"
-                      app_env: test_dompdf
-                      install_wkhtmltopdf: false
-                      remove_packages: "knplabs/knp-snappy-bundle"
+                    -   scenario: dompdf
+                        name: "Dompdf"
+                        app_env: test_dompdf
+                        install_wkhtmltopdf: false
+                        remove_packages: "knplabs/knp-snappy-bundle"
 
-                    - scenario: dompdf_unavailable
-                      name: "Dompdf (unavailable)"
-                      app_env: test_dompdf
-                      install_wkhtmltopdf: false
-                      remove_packages: "dompdf/dompdf knplabs/knp-snappy-bundle"
+                    -   scenario: dompdf_unavailable
+                        name: "Dompdf (unavailable)"
+                        app_env: test_dompdf
+                        install_wkhtmltopdf: false
+                        remove_packages: "dompdf/dompdf knplabs/knp-snappy-bundle"
 
         env:
             APP_ENV: ${{ matrix.app_env }}
 
         steps:
-            -
-                uses: actions/checkout@v6
+            -   uses: actions/checkout@v6
 
-            -
-                name: Setup PHP
+            -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: "${{ matrix.php }}"
                     coverage: none
 
-            -
-                name: Setup cache for wkhtmltopdf
+            -   name: Setup cache for wkhtmltopdf
                 uses: actions/cache@v6
                 id: cache-wkhtmltopdf
                 if: matrix.install_wkhtmltopdf
@@ -102,21 +98,18 @@ jobs:
                     path: /usr/local/bin/wkhtmltopdf
                     key: wkhtmltopdf-0.12.6.1-2
 
-            -
-                name: Install wkhtmltopdf
+            -   name: Install wkhtmltopdf
                 if: matrix.install_wkhtmltopdf && steps.cache-wkhtmltopdf.outputs.cache-hit != 'true'
                 run: |
                     sudo apt-get install -y xfonts-base xfonts-75dpi
                     wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
                     sudo dpkg -i wkhtmltox_0.12.6.1-2.jammy_amd64.deb
 
-            -
-                name: Get Composer cache directory
+            -   name: Get Composer cache directory
                 id: composer-cache
                 run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-            -
-                name: Cache Composer
+            -   name: Cache Composer
                 uses: actions/cache@v6
                 with:
                     path: ${{ steps.composer-cache.outputs.dir }}
@@ -124,32 +117,26 @@ jobs:
                     restore-keys: |
                         ${{ runner.os }}-php-${{ matrix.php }}-composer-
 
-            -
-                name: Restrict Symfony version
+            -   name: Restrict Symfony version
                 if: matrix.symfony != ''
                 run: |
                     composer global config --no-plugins allow-plugins.symfony/flex true
                     composer global require --no-progress --no-scripts --no-plugins "symfony/flex:^1.10"
                     composer config extra.symfony.require "${{ matrix.symfony }}"
 
-            -
-                name: Remove packages for matrix variant
+            -   name: Remove packages for matrix variant
                 if: matrix.remove_packages != ''
                 run: composer remove --dev --no-update ${{ matrix.remove_packages }}
 
-            -
-                name: Install PHP dependencies
+            -   name: Install PHP dependencies
                 run: composer install --no-interaction --no-scripts
 
-            -
-                name: Run PHPStan
+            -   name: Run PHPStan
                 if: matrix.remove_packages == ''
                 run: vendor/bin/phpstan analyse -c phpstan.dist.neon
 
-            -
-                name: Run ECS
+            -   name: Run ECS
                 run: vendor/bin/ecs check
 
-            -
-                name: Run PHPUnit
+            -   name: Run PHPUnit
                 run: vendor/bin/phpunit --colors=always

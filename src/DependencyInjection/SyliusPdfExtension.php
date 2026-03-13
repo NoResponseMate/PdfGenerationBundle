@@ -84,7 +84,7 @@ final class SyliusPdfExtension extends Extension
         $rendererDefinition->setArgument(0, new ServiceLocatorArgument($adapterReferences));
 
         if ([] !== $deferredAdapterContexts) {
-            $container->setParameter('sylius_pdf.deferred_adapter_contexts', $deferredAdapterContexts);
+            $container->setParameter('.sylius_pdf.deferred_adapter_contexts', $deferredAdapterContexts);
         }
     }
 

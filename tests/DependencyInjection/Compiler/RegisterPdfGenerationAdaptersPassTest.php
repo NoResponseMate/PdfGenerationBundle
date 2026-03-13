@@ -51,7 +51,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
@@ -81,7 +81,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
@@ -112,7 +112,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'default' => 'my_custom',
         ]);
 
@@ -136,7 +136,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'invoice' => 'nonexistent_adapter',
         ]);
 
@@ -157,7 +157,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
@@ -182,7 +182,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         ]);
         $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
 
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
@@ -200,28 +200,5 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $this->expectExceptionMessage('The PDF generation adapter key "my_custom" is already registered');
 
         $pass->process($container);
-    }
-
-    #[Test]
-    public function it_cleans_up_the_temporary_parameter(): void
-    {
-        $container = new ContainerBuilder();
-        $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
-            new ServiceLocatorArgument([]),
-        ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
-
-        $container->setParameter('sylius_pdf.deferred_adapter_contexts', [
-            'invoice' => 'my_custom',
-        ]);
-
-        $customAdapterDefinition = new Definition(\stdClass::class);
-        $customAdapterDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
-        $container->setDefinition('app.adapter.custom', $customAdapterDefinition);
-
-        $pass = new RegisterPdfGenerationAdaptersPass();
-        $pass->process($container);
-
-        self::assertFalse($container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
     }
 }

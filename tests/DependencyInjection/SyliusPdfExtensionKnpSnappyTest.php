@@ -156,10 +156,10 @@ final class SyliusPdfExtensionKnpSnappyTest extends AbstractExtensionTestCase
             ],
         ]);
 
-        self::assertTrue($this->container->hasParameter('sylius_pdf.deferred_adapter_contexts'));
+        self::assertTrue($this->container->hasParameter('.sylius_pdf.deferred_adapter_contexts'));
 
         /** @var array<string, string> $deferred */
-        $deferred = $this->container->getParameter('sylius_pdf.deferred_adapter_contexts');
+        $deferred = $this->container->getParameter('.sylius_pdf.deferred_adapter_contexts');
         self::assertSame(['invoice' => 'my_custom'], $deferred);
     }
 
