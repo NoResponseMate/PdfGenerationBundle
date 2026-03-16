@@ -24,4 +24,6 @@ interface PdfStorageInterface
     public function has(string $filename): bool;
 
     public function get(string $filename): PdfFile;
+
+    public function resolveLocalPath(string $filename): string;
 }

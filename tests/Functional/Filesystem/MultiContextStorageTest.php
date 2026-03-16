@@ -61,6 +61,17 @@ final class MultiContextStorageTest extends KernelTestCase
                 rmdir($dir);
             }
         }
+
+        /** @var string $cacheDir */
+        $cacheDir = self::getContainer()->getParameter('kernel.cache_dir');
+        $localCacheDir = $cacheDir . '/pdf_local_cache';
+        if (is_dir($localCacheDir)) {
+            $files = glob($localCacheDir . '/*.pdf');
+            if (false !== $files) {
+                array_map('unlink', $files);
+            }
+            rmdir($localCacheDir);
+        }
     }
 
     #[Test]
@@ -135,6 +146,32 @@ final class MultiContextStorageTest extends KernelTestCase
         self::assertTrue($manager->has('implicit-default.pdf'));
         self::assertTrue($manager->has('implicit-default.pdf', 'default'));
         self::assertFalse($manager->has('implicit-default.pdf', 'invoice'));
+    }
+
+    #[Test]
+    public function it_resolves_local_path_for_default_filesystem_context(): void
+    {
+        $manager = $this->getManager();
+        $manager->save(new PdfFile('local-default.pdf', 'default-content'));
+
+        $localPath = $manager->resolveLocalPath('local-default.pdf');
+
+        self::assertStringStartsWith('/', $localPath);
+        self::assertFileExists($localPath);
+        self::assertSame('default-content', file_get_contents($localPath));
+    }
+
+    #[Test]
+    public function it_resolves_local_path_for_flysystem_invoice_context(): void
+    {
+        $manager = $this->getManager();
+        $manager->save(new PdfFile('local-invoice.pdf', 'invoice-content'), 'invoice');
+
+        $localPath = $manager->resolveLocalPath('local-invoice.pdf', 'invoice');
+
+        self::assertStringStartsWith('/', $localPath);
+        self::assertFileExists($localPath);
+        self::assertSame('invoice-content', file_get_contents($localPath));
     }
 
     private function getManager(): PdfFileManagerInterface

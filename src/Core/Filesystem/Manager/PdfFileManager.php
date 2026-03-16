@@ -44,6 +44,11 @@ final class PdfFileManager implements PdfFileManagerInterface
         return $this->getStorage($context)->get($filename);
     }
 
+    public function resolveLocalPath(string $filename, string $context = 'default'): string
+    {
+        return $this->getStorage($context)->resolveLocalPath($filename);
+    }
+
     private function getStorage(string $context): PdfStorageInterface
     {
         if (!$this->storageLocator->has($context)) {

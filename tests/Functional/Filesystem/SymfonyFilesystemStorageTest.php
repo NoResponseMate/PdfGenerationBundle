@@ -143,6 +143,19 @@ final class SymfonyFilesystemStorageTest extends KernelTestCase
         self::assertSame('updated', $retrieved->content());
     }
 
+    #[Test]
+    public function it_resolves_local_path(): void
+    {
+        $manager = $this->getManager();
+        $manager->save(new PdfFile('local-path.pdf', 'pdf-content'));
+
+        $localPath = $manager->resolveLocalPath('local-path.pdf');
+
+        self::assertStringStartsWith('/', $localPath);
+        self::assertFileExists($localPath);
+        self::assertSame('pdf-content', file_get_contents($localPath));
+    }
+
     private function getManager(): PdfFileManagerInterface
     {
         $manager = self::getContainer()->get('test.sylius_pdf.manager');

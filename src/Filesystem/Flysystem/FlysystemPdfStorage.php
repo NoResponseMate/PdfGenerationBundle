@@ -17,12 +17,15 @@ use League\Flysystem\FilesystemOperator;
 use League\Flysystem\UnableToReadFile;
 use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
 use Sylius\PdfBundle\Core\Model\PdfFile;
+use Symfony\Component\Filesystem\Filesystem as LocalFilesystem;
 
 final class FlysystemPdfStorage implements PdfStorageInterface
 {
     public function __construct(
         private readonly FilesystemOperator $filesystem,
+        private readonly LocalFilesystem $localFilesystem,
         private readonly string $prefix = '',
+        private readonly ?string $localCacheDirectory = null,
     ) {
     }
 
@@ -31,11 +34,15 @@ final class FlysystemPdfStorage implements PdfStorageInterface
         $path = $this->resolvePath($file->filename());
         $this->filesystem->write($path, $file->content());
         $file->setStoragePath($path);
+
+        $this->invalidateLocalCache($file->filename());
     }
 
     public function remove(string $filename): void
     {
         $this->filesystem->delete($this->resolvePath($filename));
+
+        $this->invalidateLocalCache($filename);
     }
 
     public function has(string $filename): bool
@@ -57,6 +64,47 @@ final class FlysystemPdfStorage implements PdfStorageInterface
         $file->setStoragePath($path);
 
         return $file;
+    }
+
+    public function resolveLocalPath(string $filename): string
+    {
+        if (null === $this->localCacheDirectory) {
+            throw new \LogicException('The "local_cache_directory" option must be configured to use resolveLocalPath() with Flysystem storage.');
+        }
+
+        $localPath = $this->resolveLocalCachePath($filename);
+
+        if (!is_file($localPath)) {
+            $pdfFile = $this->get($filename);
+            $this->localFilesystem->dumpFile($localPath, $pdfFile->content());
+        }
+
+        return $localPath;
+    }
+
+    private function invalidateLocalCache(string $filename): void
+    {
+        if (null === $this->localCacheDirectory) {
+            return;
+        }
+
+        $localPath = $this->resolveLocalCachePath($filename);
+
+        if (is_file($localPath)) {
+            $this->localFilesystem->remove($localPath);
+        }
+    }
+
+    private function resolveLocalCachePath(string $filename): string
+    {
+        if ($filename !== basename($filename)) {
+            throw new \InvalidArgumentException(sprintf('Invalid PDF filename "%s": directory separators are not allowed.', $filename));
+        }
+
+        /** @var string $localCacheDirectory */
+        $localCacheDirectory = $this->localCacheDirectory;
+
+        return rtrim($localCacheDirectory, \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR . $filename;
     }
 
     private function resolvePath(string $filename): string

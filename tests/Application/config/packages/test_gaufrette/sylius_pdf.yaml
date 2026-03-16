@@ -5,3 +5,4 @@ sylius_pdf:
             type: gaufrette
             filesystem: gaufrette.pdf_filesystem
             prefix: pdf
+            local_cache_directory: '%kernel.cache_dir%/pdf_local_cache'

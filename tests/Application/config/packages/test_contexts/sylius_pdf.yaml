@@ -11,3 +11,4 @@ sylius_pdf:
                 type: flysystem
                 filesystem: invoice.storage
                 prefix: invoices
+                local_cache_directory: '%kernel.cache_dir%/pdf_local_cache'

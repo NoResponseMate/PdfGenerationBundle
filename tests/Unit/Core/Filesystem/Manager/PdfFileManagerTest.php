@@ -108,6 +108,17 @@ final class PdfFileManagerTest extends TestCase
     }
 
     #[Test]
+    public function it_delegates_resolve_local_path_to_correct_storage(): void
+    {
+        $this->invoiceStorage->expects(self::once())
+            ->method('resolveLocalPath')
+            ->with('test.pdf')
+            ->willReturn('/tmp/cache/test.pdf');
+
+        self::assertSame('/tmp/cache/test.pdf', $this->manager->resolveLocalPath('test.pdf', 'invoice'));
+    }
+
+    #[Test]
     public function it_throws_for_unknown_context(): void
     {
         $this->expectException(\InvalidArgumentException::class);

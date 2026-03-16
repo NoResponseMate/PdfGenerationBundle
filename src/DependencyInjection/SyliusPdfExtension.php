@@ -32,16 +32,13 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 final class SyliusPdfExtension extends Extension
 {
-    private const BUILT_IN_ADAPTERS = [KnpSnappyAdapter::NAME, DompdfAdapter::NAME];
-
-    private const ADAPTER_REQUIRED_CLASSES = [
-        KnpSnappyAdapter::NAME => \Knp\Snappy\GeneratorInterface::class,
-        DompdfAdapter::NAME => \Dompdf\Dompdf::class,
+    private const ADAPTER_REQUIRED = [
+        KnpSnappyAdapter::NAME => ['class' => \Knp\Snappy\GeneratorInterface::class, 'package' => 'knplabs/knp-snappy-bundle'],
+        DompdfAdapter::NAME => ['class' => \Dompdf\Dompdf::class, 'package' => 'dompdf/dompdf'],
     ];
 
-    private const STORAGE_REQUIRED_CLASSES = [
-        'filesystem' => 'Symfony\Component\Filesystem\Filesystem',
-        'gaufrette' => 'Gaufrette\Filesystem',
+    private const STORAGE_REQUIRED = [
+        'gaufrette' => ['class' => 'Gaufrette\Filesystem', 'package' => 'knplabs/knp-gaufrette-bundle'],
     ];
 
     public function load(array $configs, ContainerBuilder $container): void
@@ -109,18 +106,18 @@ final class SyliusPdfExtension extends Extension
         string $adapterName,
         array &$loadedAdapterFiles,
     ): bool {
-        if (!in_array($adapterName, self::BUILT_IN_ADAPTERS, true)) {
+        if (!isset(self::ADAPTER_REQUIRED[$adapterName])) {
             return false;
         }
 
-        $requiredClass = self::ADAPTER_REQUIRED_CLASSES[$adapterName];
-        if (!class_exists($requiredClass) && !interface_exists($requiredClass)) {
+        $required = self::ADAPTER_REQUIRED[$adapterName];
+        if (!class_exists($required['class']) && !interface_exists($required['class'])) {
             throw new \LogicException(sprintf(
                 'The "%s" adapter is configured for the "%s" context, but its required dependency "%s" is not installed. Try running "composer require %s".',
                 $adapterName,
                 $contextName,
-                $requiredClass,
-                KnpSnappyAdapter::NAME === $adapterName ? 'knplabs/knp-snappy-bundle' : 'dompdf/dompdf',
+                $required['class'],
+                $required['package'],
             ));
         }
 
@@ -151,17 +148,15 @@ final class SyliusPdfExtension extends Extension
         /** @var string $type */
         $type = $storageConfig['type'];
 
-        if (isset(self::STORAGE_REQUIRED_CLASSES[$type])) {
-            $requiredClass = self::STORAGE_REQUIRED_CLASSES[$type];
-            if (!class_exists($requiredClass)) {
-                $package = 'filesystem' === $type ? 'symfony/filesystem' : 'knplabs/knp-gaufrette-bundle';
-
+        if (isset(self::STORAGE_REQUIRED[$type])) {
+            $required = self::STORAGE_REQUIRED[$type];
+            if (!class_exists($required['class'])) {
                 throw new \LogicException(sprintf(
                     'The "%s" storage type is configured for the "%s" context, but its required dependency "%s" is not installed. Try running "composer require %s".',
                     $type,
                     $context,
-                    $requiredClass,
-                    $package,
+                    $required['class'],
+                    $required['package'],
                 ));
             }
         }
@@ -173,10 +168,15 @@ final class SyliusPdfExtension extends Extension
         /** @var string $prefix */
         $prefix = $storageConfig['prefix'] ?? '';
 
+        /** @var string|null $localCacheDirectory */
+        $localCacheDirectory = $storageConfig['local_cache_directory'] ?? null;
+
         $definition = match ($type) {
             'flysystem' => new Definition(FlysystemPdfStorage::class, [
                 new Reference($filesystemServiceId),
+                new Reference('filesystem'),
                 $prefix,
+                $localCacheDirectory,
             ]),
             'filesystem' => new Definition(SymfonyFilesystemPdfStorage::class, [
                 new Reference('filesystem'),
@@ -184,7 +184,9 @@ final class SyliusPdfExtension extends Extension
             ]),
             'gaufrette' => new Definition(GaufrettePdfStorage::class, [
                 new Reference($filesystemServiceId),
+                new Reference('filesystem'),
                 $prefix,
+                $localCacheDirectory,
             ]),
             default => throw new \InvalidArgumentException(sprintf('Unknown storage type "%s".', $type)),
         };

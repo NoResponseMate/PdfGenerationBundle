@@ -113,4 +113,14 @@ final class SymfonyFilesystemPdfStorageTest extends TestCase
 
         $this->storage->has('subdir/file.pdf');
     }
+
+    #[Test]
+    public function it_resolves_local_path(): void
+    {
+        $this->storage->save(new PdfFile('invoice.pdf', 'PDF content'));
+
+        $localPath = $this->storage->resolveLocalPath('invoice.pdf');
+
+        self::assertSame($this->tempDir . '/invoice.pdf', $localPath);
+    }
 }

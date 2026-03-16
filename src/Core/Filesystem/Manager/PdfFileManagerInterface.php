@@ -24,4 +24,6 @@ interface PdfFileManagerInterface
     public function has(string $filename, string $context = 'default'): bool;
 
     public function get(string $filename, string $context = 'default'): PdfFile;
+
+    public function resolveLocalPath(string $filename, string $context = 'default'): string;
 }

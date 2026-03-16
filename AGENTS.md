@@ -38,14 +38,16 @@ PdfStorageInterface::save(PdfFile $file): void
 PdfStorageInterface::remove(string $filename): void
 PdfStorageInterface::has(string $filename): bool
 PdfStorageInterface::get(string $filename): PdfFile
+PdfStorageInterface::resolveLocalPath(string $filename): string
 ```
-Context-unaware storage contract. Each instance handles one location. Implementations: `FlysystemPdfStorage` (default), `SymfonyFilesystemPdfStorage`, `GaufrettePdfStorage`.
+Context-unaware storage contract. Each instance handles one location. `resolveLocalPath()` returns an absolute local filesystem path — for `SymfonyFilesystemPdfStorage` this is the existing path; for Flysystem/Gaufrette it lazily materializes a local copy in the configured `local_cache_directory`. Implementations: `FlysystemPdfStorage` (default), `SymfonyFilesystemPdfStorage`, `GaufrettePdfStorage`.
 
 ```
 PdfFileManagerInterface::save(PdfFile $file, string $context = 'default'): void
 PdfFileManagerInterface::remove(string $filename, string $context = 'default'): void
 PdfFileManagerInterface::has(string $filename, string $context = 'default'): bool
 PdfFileManagerInterface::get(string $filename, string $context = 'default'): PdfFile
+PdfFileManagerInterface::resolveLocalPath(string $filename, string $context = 'default'): string
 ```
 Manages PDF file persistence. `PdfFileManager` delegates to per-context `PdfStorageInterface` instances via a ServiceLocator.
 
@@ -79,7 +81,7 @@ PdfFileManager (context-aware)
   -> ServiceLocator keyed by context name
        -> PdfStorageInterface instance per context
             FlysystemPdfStorage    (league/flysystem-bundle — default, hard dep)
-            SymfonyFilesystemPdfStorage  (symfony/filesystem — optional)
+            SymfonyFilesystemPdfStorage  (symfony/filesystem — hard dep)
             GaufrettePdfStorage    (knp-gaufrette-bundle — optional)
 ```
 
@@ -123,6 +125,7 @@ sylius_pdf:
             filesystem: 'default.storage'  # service ID (flysystem/gaufrette)
             prefix: 'pdf'                  # path prefix (flysystem/gaufrette)
             directory: ~                   # local path (filesystem only)
+            local_cache_directory: ~       # local cache for resolveLocalPath() (flysystem/gaufrette)
     contexts:
         invoice:
             adapter: dompdf
@@ -130,6 +133,7 @@ sylius_pdf:
                 type: flysystem
                 filesystem: 's3.storage'
                 prefix: 'invoices'
+                local_cache_directory: '%kernel.project_dir%/var/pdf_cache'
         receipt:
             adapter: knp_snappy
             storage:
@@ -329,18 +333,21 @@ Both adapters are optional dependencies. Configuring an adapter whose package is
 
 ### Flysystem (`flysystem`) — default
 - Requires: `league/flysystem-bundle` ^3.0 (hard dependency)
-- Constructor: `FilesystemOperator $filesystem, string $prefix = ''`
+- Constructor: `FilesystemOperator $filesystem, LocalFilesystem $localFilesystem, string $prefix = '', ?string $localCacheDirectory = null`
 - Paths use `/` separator (Flysystem normalizes), sets `storagePath` on saved/retrieved files
+- `resolveLocalPath()` requires `local_cache_directory` config; lazily fetches and caches locally, invalidates on save/remove
 
 ### Symfony Filesystem (`filesystem`)
-- Requires: `symfony/filesystem` (optional)
+- Requires: `symfony/filesystem` (hard dependency)
 - Constructor: `Filesystem $filesystem, string $directory`
 - Uses `DIRECTORY_SEPARATOR` for paths, sets `storagePath` on saved/retrieved files
+- `resolveLocalPath()` delegates to internal `resolvePath()` — file is already local
 
 ### Gaufrette (`gaufrette`)
 - Requires: `knplabs/knp-gaufrette-bundle` (optional)
-- Constructor: `Filesystem $filesystem, string $prefix = ''`
+- Constructor: `GaufretteFilesystem $filesystem, LocalFilesystem $localFilesystem, string $prefix = '', ?string $localCacheDirectory = null`
 - Paths use `/` separator, sets `storagePath` on saved/retrieved files
+- `resolveLocalPath()` requires `local_cache_directory` config; lazily fetches and caches locally, invalidates on save/remove
 
 ## Development
 

@@ -60,6 +60,7 @@ sylius_pdf:
             type: flysystem
             filesystem: 'default.storage'
             prefix: 'pdf'
+            local_cache_directory: '%kernel.project_dir%/var/pdf_cache'
     contexts:
         invoice:
             adapter: knp_snappy
@@ -77,6 +78,7 @@ sylius_pdf:
 | `storage.filesystem` | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).        |
 | `storage.prefix`     | Path prefix for Flysystem/Gaufrette storage.                               |
 | `storage.directory`  | Local directory path (required for `filesystem` type only).                |
+| `storage.local_cache_directory` | Local cache path for `resolveLocalPath()` (Flysystem/Gaufrette only). |
 
 Each context (including `default`) can override `storage`. When omitted, the default storage configuration is inherited. The context name `default` is reserved and cannot be used inside `contexts`.
 
@@ -158,6 +160,9 @@ $file = $this->manager->get('report.pdf', 'invoice');
 
 // Remove
 $this->manager->remove('report.pdf', 'invoice');
+
+// Resolve absolute local path (e.g. for email attachments)
+$localPath = $this->manager->resolveLocalPath('report.pdf', 'invoice');
 ```
 
 ## Extending the bundle

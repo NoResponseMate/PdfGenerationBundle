@@ -57,6 +57,15 @@ final class FlysystemStorageTest extends KernelTestCase
             }
             rmdir($pdfDir);
         }
+
+        $cacheDir = dirname($this->flysystemDirectory) . '/pdf_local_cache';
+        if (is_dir($cacheDir)) {
+            $files = glob($cacheDir . '/*.pdf');
+            if (false !== $files) {
+                array_map('unlink', $files);
+            }
+            rmdir($cacheDir);
+        }
     }
 
     #[Test]
@@ -149,6 +158,33 @@ final class FlysystemStorageTest extends KernelTestCase
         $manager->save(new PdfFile('prefixed.pdf', 'content'));
 
         self::assertFileExists($this->flysystemDirectory . '/pdf/prefixed.pdf');
+    }
+
+    #[Test]
+    public function it_resolves_local_path(): void
+    {
+        $manager = $this->getManager();
+        $manager->save(new PdfFile('local-path.pdf', 'pdf-content'));
+
+        $localPath = $manager->resolveLocalPath('local-path.pdf');
+
+        self::assertStringStartsWith('/', $localPath);
+        self::assertFileExists($localPath);
+        self::assertSame('pdf-content', file_get_contents($localPath));
+    }
+
+    #[Test]
+    public function it_invalidates_local_cache_on_save(): void
+    {
+        $manager = $this->getManager();
+
+        $manager->save(new PdfFile('cache-test.pdf', 'original'));
+        $localPath = $manager->resolveLocalPath('cache-test.pdf');
+        self::assertSame('original', file_get_contents($localPath));
+
+        $manager->save(new PdfFile('cache-test.pdf', 'updated'));
+        $localPath = $manager->resolveLocalPath('cache-test.pdf');
+        self::assertSame('updated', file_get_contents($localPath));
     }
 
     private function getManager(): PdfFileManagerInterface

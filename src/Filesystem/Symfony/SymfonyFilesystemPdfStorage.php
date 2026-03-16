@@ -62,6 +62,11 @@ final class SymfonyFilesystemPdfStorage implements PdfStorageInterface
         return $file;
     }
 
+    public function resolveLocalPath(string $filename): string
+    {
+        return $this->resolvePath($filename);
+    }
+
     private function resolvePath(string $filename): string
     {
         if ($filename !== basename($filename)) {
