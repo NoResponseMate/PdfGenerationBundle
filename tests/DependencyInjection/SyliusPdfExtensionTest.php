@@ -26,8 +26,6 @@ use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Extension\Extension;
 
 final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 {
@@ -42,18 +40,26 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             'sylius_pdf.renderer.html',
             HtmlToPdfRenderer::class,
         );
+        $this->assertContainerBuilderHasAlias(
+            HtmlToPdfRendererInterface::class,
+            'sylius_pdf.renderer.html',
+        );
     }
 
     #[Test]
-    public function it_aliases_renderer_interface_to_html_renderer(): void
+    public function it_registers_twig_renderer_service(): void
     {
         $this->load([
             'default' => ['adapter' => 'my_custom'],
         ]);
 
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.renderer.twig',
+            TwigToPdfRenderer::class,
+        );
         $this->assertContainerBuilderHasAlias(
-            HtmlToPdfRendererInterface::class,
-            'sylius_pdf.renderer.html',
+            TwigToPdfRendererInterface::class,
+            'sylius_pdf.renderer.twig',
         );
     }
 
@@ -408,63 +414,6 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 
         self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.knp_snappy'));
         self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.dompdf'));
-    }
-
-    #[Test]
-    public function it_registers_twig_to_pdf_renderer_service_when_twig_is_available(): void
-    {
-        $this->container->registerExtension(new class() extends Extension {
-            public function load(array $configs, ContainerBuilder $container): void
-            {
-            }
-
-            public function getAlias(): string
-            {
-                return 'twig';
-            }
-        });
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-        ]);
-
-        $this->assertContainerBuilderHasService(
-            'sylius_pdf.renderer.twig',
-            TwigToPdfRenderer::class,
-        );
-    }
-
-    #[Test]
-    public function it_aliases_twig_renderer_interface_to_twig_renderer_when_twig_is_available(): void
-    {
-        $this->container->registerExtension(new class() extends Extension {
-            public function load(array $configs, ContainerBuilder $container): void
-            {
-            }
-
-            public function getAlias(): string
-            {
-                return 'twig';
-            }
-        });
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-        ]);
-
-        $this->assertContainerBuilderHasAlias(
-            TwigToPdfRendererInterface::class,
-            'sylius_pdf.renderer.twig',
-        );
-    }
-
-    #[Test]
-    public function it_does_not_register_twig_renderer_when_twig_is_not_available(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-        ]);
-
-        self::assertFalse($this->container->hasDefinition('sylius_pdf.renderer.twig'));
-        self::assertFalse($this->container->hasAlias(TwigToPdfRendererInterface::class));
     }
 
     protected function getContainerExtensions(): array

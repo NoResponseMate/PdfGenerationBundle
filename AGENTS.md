@@ -160,8 +160,7 @@ src/
     SyliusPdfExtension.php
   SyliusPdfBundle.php
 config/
-  services.php                # core services (HtmlToPdfRenderer, manager, registry)
-  services_twig.php           # TwigToPdfRenderer (conditionally loaded when Twig is installed)
+  services.php                # core services (HtmlToPdfRenderer, TwigToPdfRenderer, manager, registry)
   adapter/knp_snappy.php      # KnpSnappy adapter + processor + provider (abstract)
   adapter/dompdf.php          # Dompdf adapter + processor + provider (abstract)
 ```

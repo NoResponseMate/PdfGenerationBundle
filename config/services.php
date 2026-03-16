@@ -19,6 +19,8 @@ use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
+use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
@@ -57,4 +59,11 @@ return static function (ContainerConfigurator $container): void {
         ])
     ;
     $services->alias(GeneratorProviderRegistryInterface::class, 'sylius_pdf.registry.generator_provider');
+
+    $services->set('sylius_pdf.renderer.twig', TwigToPdfRenderer::class)
+        ->args([
+            service('twig'),
+            service('sylius_pdf.renderer.html'),
+        ]);
+    $services->alias(TwigToPdfRendererInterface::class, 'sylius_pdf.renderer.twig');
 };

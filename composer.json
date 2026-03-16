@@ -8,7 +8,9 @@
         "symfony/config": "^6.4 || ^7.4",
         "symfony/dependency-injection": "^6.4 || ^7.4",
         "symfony/filesystem": "^6.4 || ^7.4",
-        "symfony/http-kernel": "^6.4 || ^7.4"
+        "symfony/http-kernel": "^6.4 || ^7.4",
+        "symfony/twig-bundle": "^6.4 || ^7.4",
+        "twig/twig": "^3.0"
     },
     "require-dev": {
         "dompdf/dompdf": "^3.1",
@@ -21,13 +23,11 @@
         "phpunit/phpunit": "^10.5",
         "sylius-labs/coding-standard": "^4.4",
         "symfony/console": "^6.4 || ^7.4",
-        "symfony/framework-bundle": "^6.4 || ^7.4",
-        "symfony/twig-bundle": "^6.4 || ^7.4"
+        "symfony/framework-bundle": "^6.4 || ^7.4"
     },
     "suggest": {
         "dompdf/dompdf": "Required for the Dompdf adapter",
-        "knplabs/knp-snappy-bundle": "Required for the KnpSnappy adapter (wkhtmltopdf)",
-        "symfony/twig-bundle": "Required for the Twig-to-PDF renderer"
+        "knplabs/knp-snappy-bundle": "Required for the KnpSnappy adapter (wkhtmltopdf)"
     },
     "config": {
         "allow-plugins": {
