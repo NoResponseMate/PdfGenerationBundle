@@ -18,8 +18,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ["8.2", "8.3"]
-                symfony: ["^6.4", "^7.4"]
+                php: ["8.2", "8.3", "8.4"]
+                symfony: ["^6.4", "^7.4", "^8.0"]
                 scenario:
                     - full_snappy
                     - full_dompdf
@@ -36,8 +36,19 @@ jobs:
                 exclude:
                     -   php: "8.2"
                         symfony: "^7.4"
+                    -   php: "8.2"
+                        symfony: "^8.0"
                     -   php: "8.3"
                         symfony: "^6.4"
+                    -   php: "8.3"
+                        symfony: "^8.0"
+                    -   php: "8.4"
+                        symfony: "^6.4"
+                    -   php: "8.4"
+                        symfony: "^7.4"
+                    -   php: "8.4"
+                        symfony: "^8.0"
+                        scenario: gaufrette_storage
 
                 include:
                     -   scenario: full_snappy
@@ -151,6 +162,10 @@ jobs:
                     composer global config --no-plugins allow-plugins.symfony/flex true
                     composer global require --no-progress --no-scripts --no-plugins "symfony/flex:^1.10"
                     composer config extra.symfony.require "${{ matrix.symfony }}"
+
+            -   name: Remove Gaufrette (no Symfony 8 support)
+                if: matrix.symfony == '^8.0'
+                run: composer remove --dev --no-update knplabs/knp-gaufrette-bundle
 
             -   name: Remove packages for matrix variant
                 if: matrix.remove_packages != ''

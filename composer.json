@@ -6,26 +6,26 @@
     "require": {
         "php": ">=8.2",
         "league/flysystem-bundle": "^3.0",
-        "symfony/config": "^6.4 || ^7.4",
-        "symfony/dependency-injection": "^6.4 || ^7.4",
-        "symfony/http-kernel": "^6.4 || ^7.4",
-        "symfony/twig-bundle": "^6.4 || ^7.4",
+        "symfony/config": "^6.4 || ^7.4 || ^8.0",
+        "symfony/dependency-injection": "^6.4 || ^7.4 || ^8.0",
+        "symfony/http-kernel": "^6.4 || ^7.4 || ^8.0",
+        "symfony/twig-bundle": "^6.4 || ^7.4 || ^8.0",
         "twig/twig": "^3.0"
     },
     "require-dev": {
         "dompdf/dompdf": "^3.1",
         "knplabs/knp-gaufrette-bundle": "^0.9.0",
         "knplabs/knp-snappy-bundle": "^1.10",
-        "matthiasnoback/symfony-config-test": "^5.1",
-        "matthiasnoback/symfony-dependency-injection-test": "^5.1",
+        "matthiasnoback/symfony-config-test": "^5.1 || ^6.0",
+        "matthiasnoback/symfony-dependency-injection-test": "^5.1 || ^6.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^1.12",
         "phpstan/phpstan-symfony": "^1.4",
         "phpunit/phpunit": "^10.5",
         "sylius-labs/coding-standard": "^4.4",
-        "symfony/console": "^6.4 || ^7.4",
-        "symfony/filesystem": "^6.4 || ^7.4",
-        "symfony/framework-bundle": "^6.4 || ^7.4"
+        "symfony/console": "^6.4 || ^7.4 || ^8.0",
+        "symfony/filesystem": "^6.4 || ^7.4 || ^8.0",
+        "symfony/framework-bundle": "^6.4 || ^7.4 || ^8.0"
     },
     "suggest": {
         "dompdf/dompdf": "Required for the Dompdf adapter",
