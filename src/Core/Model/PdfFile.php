@@ -15,7 +15,7 @@ namespace Sylius\PdfBundle\Core\Model;
 
 final class PdfFile
 {
-    private ?string $fullPath = null;
+    private ?string $storagePath = null;
 
     public function __construct(
         private readonly string $filename,
@@ -33,13 +33,13 @@ final class PdfFile
         return $this->content;
     }
 
-    public function fullPath(): ?string
+    public function storagePath(): ?string
     {
-        return $this->fullPath;
+        return $this->storagePath;
     }
 
-    public function setFullPath(string $fullPath): void
+    public function setStoragePath(string $storagePath): void
     {
-        $this->fullPath = $fullPath;
+        $this->storagePath = $storagePath;
     }
 }

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional;
+namespace Tests\Sylius\PdfBundle\Functional\Bridge;
 
 use Dompdf\Dompdf;
 use Knp\Snappy\GeneratorInterface;

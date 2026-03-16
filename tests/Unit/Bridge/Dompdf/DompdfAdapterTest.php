@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Unit\Bridge\Dompdf;
 
-use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -24,22 +23,25 @@ use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 
 final class DompdfAdapterTest extends TestCase
 {
-    private GeneratorProviderRegistryInterface&MockObject $generatorProviderRegistry;
+    /** @var GeneratorProviderRegistryInterface&MockObject */
+    private MockObject $generatorProviderRegistry;
 
-    private MockObject&OptionsProcessorInterface $processor;
+    /** @var OptionsProcessorInterface&MockObject */
+    private MockObject $processor;
 
-    private Dompdf&MockObject $dompdf;
+    /** @var \Dompdf\Dompdf&MockObject */
+    private MockObject $dompdf;
 
     public static function setUpBeforeClass(): void
     {
-        if (!class_exists(Dompdf::class)) {
+        if (!class_exists(\Dompdf\Dompdf::class)) {
             self::markTestSkipped('dompdf/dompdf is not installed.');
         }
     }
 
     protected function setUp(): void
     {
-        $this->dompdf = $this->createMock(Dompdf::class);
+        $this->dompdf = $this->createMock(\Dompdf\Dompdf::class);
         $this->generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
         $this->processor = $this->createMock(OptionsProcessorInterface::class);
     }

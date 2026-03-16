@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Manager;
+namespace Sylius\PdfBundle\Core\Filesystem\Manager;
 
 use Sylius\PdfBundle\Core\Model\PdfFile;
 

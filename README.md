@@ -54,23 +54,31 @@ return [
 ```yaml
 # config/packages/sylius_pdf.yaml
 sylius_pdf:
-    pdf_files_directory: '%kernel.project_dir%/private/pdf'
     default:
         adapter: dompdf
+        storage:
+            type: flysystem
+            filesystem: 'default.storage'
+            prefix: 'pdf'
     contexts:
         invoice:
             adapter: knp_snappy
-            pdf_files_directory: '%kernel.project_dir%/private/invoices'
+            storage:
+                type: filesystem
+                directory: '%kernel.project_dir%/private/invoices'
 ```
 
-| Key                   | Description                                                                |
-|-----------------------|----------------------------------------------------------------------------|
-| `pdf_files_directory` | Root-level fallback directory for storing generated PDF files.             |
-| `default`             | Configuration for the default context (used when no context is specified). |
-| `contexts`            | Named contexts, each with its own adapter and optional directory override. |
-| `adapter`             | Adapter name: `knp_snappy` (default), `dompdf`, or a custom adapter key.   |
+| Key                  | Description                                                                |
+|----------------------|----------------------------------------------------------------------------|
+| `default`            | Configuration for the default context (used when no context is specified). |
+| `contexts`           | Named contexts, each with its own adapter and optional storage override.   |
+| `adapter`            | Adapter name: `knp_snappy` (default), `dompdf`, or a custom adapter key.   |
+| `storage.type`       | Storage backend: `flysystem` (default), `filesystem`, or `gaufrette`.      |
+| `storage.filesystem` | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).        |
+| `storage.prefix`     | Path prefix for Flysystem/Gaufrette storage.                               |
+| `storage.directory`  | Local directory path (required for `filesystem` type only).                |
 
-Each context (including `default`) can override `pdf_files_directory`. When omitted, the root-level value is inherited. The context name `default` is reserved and cannot be used inside `contexts`.
+Each context (including `default`) can override `storage`. When omitted, the default storage configuration is inherited. The context name `default` is reserved and cannot be used inside `contexts`.
 
 ## Usage
 
@@ -111,8 +119,6 @@ $pdfContent = $this->twigRenderer->render(
 );
 ```
 
-Requires `symfony/twig-bundle`.
-
 ### Using contexts
 
 Pass a context name to route rendering to a specific adapter:
@@ -132,13 +138,13 @@ use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
 $pdfFile = $this->generator->generate('invoice_001.pdf', $pdfContent, 'invoice');
 
 $pdfFile->filename();  // 'invoice_001.pdf'
-$pdfFile->fullPath();  // '/path/to/private/invoices/invoice_001.pdf'
+$pdfFile->storagePath();  // storage-relative path (e.g. '/path/to/private/invoices/invoice_001.pdf')
 ```
 
 Or use `PdfFileManagerInterface` directly for fine-grained control:
 
 ```php
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Model\PdfFile;
 
 // Save
@@ -239,7 +245,7 @@ use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
 #[AsPdfOptionsProcessor(adapter: 'dompdf', context: 'invoice', priority: 10)]
 final class InvoicePaperSizeProcessor implements OptionsProcessorInterface
 {
-    public function process(object $generator, string $context = 'default')): void
+    public function process(object $generator, string $context = 'default'): void
     {
         /** @var \Dompdf\Dompdf $generator */
         $generator->setOptions(new \Dompdf\Options(['defaultPaperSize' => 'a4']));

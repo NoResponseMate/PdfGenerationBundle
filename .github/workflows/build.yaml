@@ -23,6 +23,10 @@ jobs:
                 scenario:
                     - full_snappy
                     - full_dompdf
+                    - filesystem_storage
+                    - flysystem_storage
+                    - gaufrette_storage
+                    - multi_context_storage
                     - snappy_with_wkhtmltopdf
                     - snappy_no_wkhtmltopdf
                     - snappy_unavailable
@@ -45,6 +49,30 @@ jobs:
                     -   scenario: full_dompdf
                         name: "Full (Dompdf default)"
                         app_env: test_dompdf
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
+
+                    -   scenario: filesystem_storage
+                        name: "Symfony filesystem storage"
+                        app_env: test_filesystem
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
+
+                    -   scenario: flysystem_storage
+                        name: "Flysystem storage"
+                        app_env: test_flysystem
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
+
+                    -   scenario: gaufrette_storage
+                        name: "Gaufrette storage"
+                        app_env: test_gaufrette
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
+
+                    -   scenario: multi_context_storage
+                        name: "Multi-context storage"
+                        app_env: test_contexts
                         install_wkhtmltopdf: false
                         remove_packages: ""
 

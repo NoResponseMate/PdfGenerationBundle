@@ -17,6 +17,9 @@ use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
+use Sylius\PdfBundle\Filesystem\Flysystem\FlysystemPdfStorage;
+use Sylius\PdfBundle\Filesystem\Gaufrette\GaufrettePdfStorage;
+use Sylius\PdfBundle\Filesystem\Symfony\SymfonyFilesystemPdfStorage;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
@@ -36,14 +39,16 @@ final class SyliusPdfExtension extends Extension
         DompdfAdapter::NAME => \Dompdf\Dompdf::class,
     ];
 
+    private const STORAGE_REQUIRED_CLASSES = [
+        'filesystem' => 'Symfony\Component\Filesystem\Filesystem',
+        'gaufrette' => 'Gaufrette\Filesystem',
+    ];
+
     public function load(array $configs, ContainerBuilder $container): void
     {
         /** @var ConfigurationInterface $configuration */
         $configuration = $this->getConfiguration([], $container);
         $config = $this->processConfiguration($configuration, $configs);
-
-        $rootPdfFilesDirectory = $config['pdf_files_directory'];
-        $container->setParameter('sylius_pdf.pdf_files_directory', $rootPdfFilesDirectory);
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
         $loader->load('services.php');
@@ -59,10 +64,6 @@ final class SyliusPdfExtension extends Extension
             $deferredAdapterContexts['default'] = $config['default']['adapter'];
         }
 
-        $contextDirectories = [
-            'default' => $config['default']['pdf_files_directory'] ?? $rootPdfFilesDirectory,
-        ];
-
         foreach ($config['contexts'] as $contextName => $contextConfig) {
             $contextName = (string) $contextName;
 
@@ -71,14 +72,7 @@ final class SyliusPdfExtension extends Extension
             } else {
                 $deferredAdapterContexts[$contextName] = $contextConfig['adapter'];
             }
-
-            $contextDirectories[$contextName] = $contextConfig['pdf_files_directory'] ?? $rootPdfFilesDirectory;
         }
-
-        $container->setParameter('sylius_pdf.context_pdf_files_directories', $contextDirectories);
-
-        $managerDefinition = $container->getDefinition('sylius_pdf.manager.filesystem');
-        $managerDefinition->setArgument(0, $contextDirectories);
 
         $rendererDefinition = $container->getDefinition('sylius_pdf.renderer.html');
         $rendererDefinition->setArgument(0, new ServiceLocatorArgument($adapterReferences));
@@ -86,6 +80,23 @@ final class SyliusPdfExtension extends Extension
         if ([] !== $deferredAdapterContexts) {
             $container->setParameter('.sylius_pdf.deferred_adapter_contexts', $deferredAdapterContexts);
         }
+
+        $defaultStorageConfig = $config['default']['storage'];
+        $storageReferences = [];
+
+        $storageReferences['default'] = new Reference(
+            $this->registerStorage($container, 'default', $defaultStorageConfig),
+        );
+
+        foreach ($config['contexts'] as $contextName => $contextConfig) {
+            $contextName = (string) $contextName;
+            $storageReferences[$contextName] = new Reference(
+                $this->registerStorage($container, $contextName, $contextConfig['storage'] ?? $defaultStorageConfig),
+            );
+        }
+
+        $container->getDefinition('sylius_pdf.manager')
+            ->setArgument(0, new ServiceLocatorArgument($storageReferences));
     }
 
     /**
@@ -127,6 +138,60 @@ final class SyliusPdfExtension extends Extension
         $this->registerProcessor($container, $contextName, $adapterName);
 
         return true;
+    }
+
+    /**
+     * @param array<string, mixed> $storageConfig
+     */
+    private function registerStorage(
+        ContainerBuilder $container,
+        string $context,
+        array $storageConfig,
+    ): string {
+        /** @var string $type */
+        $type = $storageConfig['type'];
+
+        if (isset(self::STORAGE_REQUIRED_CLASSES[$type])) {
+            $requiredClass = self::STORAGE_REQUIRED_CLASSES[$type];
+            if (!class_exists($requiredClass)) {
+                $package = 'filesystem' === $type ? 'symfony/filesystem' : 'knplabs/knp-gaufrette-bundle';
+
+                throw new \LogicException(sprintf(
+                    'The "%s" storage type is configured for the "%s" context, but its required dependency "%s" is not installed. Try running "composer require %s".',
+                    $type,
+                    $context,
+                    $requiredClass,
+                    $package,
+                ));
+            }
+        }
+
+        $serviceId = sprintf('sylius_pdf.storage.%s', $context);
+
+        /** @var string $filesystemServiceId */
+        $filesystemServiceId = $storageConfig['filesystem'] ?? '';
+        /** @var string $prefix */
+        $prefix = $storageConfig['prefix'] ?? '';
+
+        $definition = match ($type) {
+            'flysystem' => new Definition(FlysystemPdfStorage::class, [
+                new Reference($filesystemServiceId),
+                $prefix,
+            ]),
+            'filesystem' => new Definition(SymfonyFilesystemPdfStorage::class, [
+                new Reference('filesystem'),
+                $storageConfig['directory'],
+            ]),
+            'gaufrette' => new Definition(GaufrettePdfStorage::class, [
+                new Reference($filesystemServiceId),
+                $prefix,
+            ]),
+            default => throw new \InvalidArgumentException(sprintf('Unknown storage type "%s".', $type)),
+        };
+
+        $container->setDefinition($serviceId, $definition);
+
+        return $serviceId;
     }
 
     private function registerProcessor(

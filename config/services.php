@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 use Sylius\PdfBundle\Core\Generator\PdfFileGenerator;
 use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
-use Sylius\PdfBundle\Core\Manager\FilesystemPdfFileManager;
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManager;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
@@ -36,14 +36,11 @@ return static function (ContainerConfigurator $container): void {
     ;
     $services->alias(HtmlToPdfRendererInterface::class, 'sylius_pdf.renderer.html');
 
-    $services->set('sylius_pdf.manager.filesystem', FilesystemPdfFileManager::class)
+    $services->set('sylius_pdf.manager', PdfFileManager::class)
         ->args([
-            abstract_arg('context directories, set by SyliusPdfExtension'),
-            service('filesystem'),
+            abstract_arg('storage service locator, set by SyliusPdfExtension'),
         ])
     ;
-
-    $services->alias('sylius_pdf.manager', 'sylius_pdf.manager.filesystem');
     $services->alias(PdfFileManagerInterface::class, 'sylius_pdf.manager');
 
     $services->set('sylius_pdf.generator', PdfFileGenerator::class)

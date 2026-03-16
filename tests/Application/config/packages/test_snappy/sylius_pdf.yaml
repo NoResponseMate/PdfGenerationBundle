@@ -1,4 +1,6 @@
 sylius_pdf:
-    pdf_files_directory: '%kernel.cache_dir%/pdf'
     default:
         adapter: knp_snappy
+        storage:
+            type: filesystem
+            directory: '%kernel.cache_dir%/pdf'

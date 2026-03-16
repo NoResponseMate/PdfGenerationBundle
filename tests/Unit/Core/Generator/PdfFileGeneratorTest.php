@@ -15,9 +15,9 @@ namespace Tests\Sylius\PdfBundle\Unit\Core\Generator;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Generator\PdfFileGenerator;
 use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Model\PdfFile;
 
 final class PdfFileGeneratorTest extends TestCase

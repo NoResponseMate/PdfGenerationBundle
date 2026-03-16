@@ -1,0 +1,9 @@
+knp_gaufrette:
+    adapters:
+        pdf_adapter:
+            local:
+                directory: '%kernel.cache_dir%/gaufrette'
+                create: true
+    filesystems:
+        pdf:
+            adapter: pdf_adapter

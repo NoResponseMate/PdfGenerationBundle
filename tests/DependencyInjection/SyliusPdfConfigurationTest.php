@@ -27,7 +27,15 @@ final class SyliusPdfConfigurationTest extends TestCase
     {
         $this->assertProcessedConfigurationEquals(
             [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => null]],
+            ['default' => [
+                'adapter' => 'knp_snappy',
+                'storage' => [
+                    'type' => 'flysystem',
+                    'filesystem' => 'default.storage',
+                    'prefix' => 'pdf',
+                    'directory' => null,
+                ],
+            ]],
             'default',
         );
     }
@@ -41,8 +49,8 @@ final class SyliusPdfConfigurationTest extends TestCase
                 'coupon' => ['adapter' => 'dompdf'],
             ]]],
             ['contexts' => [
-                'invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => null],
-                'coupon' => ['adapter' => 'dompdf', 'pdf_files_directory' => null],
+                'invoice' => ['adapter' => 'dompdf'],
+                'coupon' => ['adapter' => 'dompdf'],
             ]],
             'contexts',
         );
@@ -58,62 +66,98 @@ final class SyliusPdfConfigurationTest extends TestCase
     }
 
     #[Test]
-    public function it_has_default_pdf_files_directory(): void
+    public function it_has_default_storage_config_in_default_block(): void
     {
         $this->assertProcessedConfigurationEquals(
             [[]],
-            ['pdf_files_directory' => '%kernel.project_dir%/private/pdf'],
-            'pdf_files_directory',
-        );
-    }
-
-    #[Test]
-    public function it_allows_to_define_pdf_files_directory(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [['pdf_files_directory' => '/custom/path']],
-            ['pdf_files_directory' => '/custom/path'],
-            'pdf_files_directory',
-        );
-    }
-
-    #[Test]
-    public function it_has_null_pdf_files_directory_in_default_block_by_default(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [[]],
-            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => null]],
+            ['default' => [
+                'adapter' => 'knp_snappy',
+                'storage' => [
+                    'type' => 'flysystem',
+                    'filesystem' => 'default.storage',
+                    'prefix' => 'pdf',
+                    'directory' => null,
+                ],
+            ]],
             'default',
         );
     }
 
     #[Test]
-    public function it_has_null_pdf_files_directory_in_context_by_default(): void
+    public function it_allows_storage_override_in_default_block(): void
+    {
+        $this->assertProcessedConfigurationEquals(
+            [['default' => ['storage' => [
+                'type' => 'filesystem',
+                'directory' => '/custom/path',
+            ]]]],
+            ['default' => [
+                'adapter' => 'knp_snappy',
+                'storage' => [
+                    'type' => 'filesystem',
+                    'filesystem' => 'default.storage',
+                    'prefix' => 'pdf',
+                    'directory' => '/custom/path',
+                ],
+            ]],
+            'default',
+        );
+    }
+
+    #[Test]
+    public function it_allows_storage_per_context(): void
+    {
+        $this->assertProcessedConfigurationEquals(
+            [['contexts' => [
+                'invoice' => [
+                    'adapter' => 'dompdf',
+                    'storage' => [
+                        'type' => 'flysystem',
+                        'filesystem' => 's3.storage',
+                        'prefix' => 'invoices',
+                    ],
+                ],
+            ]]],
+            ['contexts' => [
+                'invoice' => [
+                    'adapter' => 'dompdf',
+                    'storage' => [
+                        'type' => 'flysystem',
+                        'filesystem' => 's3.storage',
+                        'prefix' => 'invoices',
+                        'directory' => null,
+                    ],
+                ],
+            ]],
+            'contexts',
+        );
+    }
+
+    #[Test]
+    public function it_rejects_filesystem_type_without_directory_in_default(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [['default' => ['storage' => ['type' => 'filesystem']]]],
+            'The "directory" option is required when storage type is "filesystem".',
+        );
+    }
+
+    #[Test]
+    public function it_rejects_filesystem_type_without_directory_in_context(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [['contexts' => ['invoice' => ['storage' => ['type' => 'filesystem']]]]],
+            'The "directory" option is required when storage type is "filesystem".',
+        );
+    }
+
+    #[Test]
+    public function it_has_no_storage_in_context_by_default(): void
     {
         $this->assertProcessedConfigurationEquals(
             [['contexts' => ['invoice' => ['adapter' => 'dompdf']]]],
-            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => null]]],
+            ['contexts' => ['invoice' => ['adapter' => 'dompdf']]],
             'contexts',
-        );
-    }
-
-    #[Test]
-    public function it_allows_pdf_files_directory_to_be_set_per_context(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => '/custom/invoices']]]],
-            ['contexts' => ['invoice' => ['adapter' => 'dompdf', 'pdf_files_directory' => '/custom/invoices']]],
-            'contexts',
-        );
-    }
-
-    #[Test]
-    public function it_allows_pdf_files_directory_to_be_set_in_default_block(): void
-    {
-        $this->assertProcessedConfigurationEquals(
-            [['default' => ['pdf_files_directory' => '/custom/default']]],
-            ['default' => ['adapter' => 'knp_snappy', 'pdf_files_directory' => '/custom/default']],
-            'default',
         );
     }
 

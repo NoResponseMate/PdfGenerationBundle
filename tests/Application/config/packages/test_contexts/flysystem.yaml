@@ -1,0 +1,6 @@
+flysystem:
+    storages:
+        invoice.storage:
+            adapter: 'local'
+            options:
+                directory: '%kernel.cache_dir%/flysystem_invoices'

@@ -1,0 +1,7 @@
+sylius_pdf:
+    default:
+        adapter: dompdf
+        storage:
+            type: gaufrette
+            filesystem: gaufrette.pdf_filesystem
+            prefix: pdf

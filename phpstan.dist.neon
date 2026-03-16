@@ -6,3 +6,5 @@ parameters:
     excludePaths:
         - tests/Application/
         - src/DependencyInjection/Configuration.php
+        - src/Filesystem/Gaufrette/
+        - tests/Unit/Filesystem/Gaufrette/

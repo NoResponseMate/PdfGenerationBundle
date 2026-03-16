@@ -34,9 +34,20 @@ GeneratorProviderInterface::get(?string $context = null): object
 Provides the underlying generator instance (e.g. a `Knp\Snappy\Pdf` or `Dompdf\Dompdf`). Used by adapters to get a fresh or shared generator per request.
 
 ```
-PdfFileManagerInterface::save/remove/has/get(... string $context = 'default'): ...
+PdfStorageInterface::save(PdfFile $file): void
+PdfStorageInterface::remove(string $filename): void
+PdfStorageInterface::has(string $filename): bool
+PdfStorageInterface::get(string $filename): PdfFile
 ```
-Manages PDF file persistence. `FilesystemPdfFileManager` stores files in per-context directories.
+Context-unaware storage contract. Each instance handles one location. Implementations: `FlysystemPdfStorage` (default), `SymfonyFilesystemPdfStorage`, `GaufrettePdfStorage`.
+
+```
+PdfFileManagerInterface::save(PdfFile $file, string $context = 'default'): void
+PdfFileManagerInterface::remove(string $filename, string $context = 'default'): void
+PdfFileManagerInterface::has(string $filename, string $context = 'default'): bool
+PdfFileManagerInterface::get(string $filename, string $context = 'default'): PdfFile
+```
+Manages PDF file persistence. `PdfFileManager` delegates to per-context `PdfStorageInterface` instances via a ServiceLocator.
 
 ```
 PdfFileGeneratorInterface::generate(string $filename, string $content, string $context = 'default'): PdfFile
@@ -61,6 +72,17 @@ TwigToPdfRenderer
        -> returns PDF string
 ```
 
+### Storage Flow
+
+```
+PdfFileManager (context-aware)
+  -> ServiceLocator keyed by context name
+       -> PdfStorageInterface instance per context
+            FlysystemPdfStorage    (league/flysystem-bundle — default, hard dep)
+            SymfonyFilesystemPdfStorage  (symfony/filesystem — optional)
+            GaufrettePdfStorage    (knp-gaufrette-bundle — optional)
+```
+
 ### Options Processing Chain
 
 Each adapter type has a `CompositeOptionsProcessor` that groups processors by context:
@@ -81,6 +103,7 @@ When processing context `default`, only: ProcessorA, ProcessorB.
 - For each context (default + named contexts):
   - If adapter is built-in (`knp_snappy`, `dompdf`): loads adapter service file once, creates a `ChildDefinition` for the context, registers an options processor tagged `sylius_pdf.options_processor`
   - If adapter is unknown: stores in `.sylius_pdf.deferred_adapter_contexts` parameter (dot-prefixed = internal, auto-removed by Symfony)
+- Builds per-context `PdfStorageInterface` instances based on `storage` config (validates required classes for each storage type, throws `LogicException` with `composer require` hint); wires into `PdfFileManager`'s ServiceLocator
 - Wires the adapter references into `HtmlToPdfRenderer`'s ServiceLocator
 
 **Compiler passes** (in registration order):
@@ -93,21 +116,30 @@ When processing context `default`, only: ProcessorA, ProcessorB.
 
 ```yaml
 sylius_pdf:
-    pdf_files_directory: '%kernel.project_dir%/private/pdf'   # root fallback
     default:
-        adapter: knp_snappy          # knp_snappy | dompdf | <custom_key>
-        pdf_files_directory: ~       # null = inherit root
+        adapter: knp_snappy               # knp_snappy | dompdf | <custom_key>
+        storage:                           # storage defaults for all contexts
+            type: flysystem                # flysystem | filesystem | gaufrette
+            filesystem: 'default.storage'  # service ID (flysystem/gaufrette)
+            prefix: 'pdf'                  # path prefix (flysystem/gaufrette)
+            directory: ~                   # local path (filesystem only)
     contexts:
         invoice:
             adapter: dompdf
-            pdf_files_directory: '%kernel.project_dir%/private/invoices'
-        coupon:
-            adapter: my_custom       # resolved via service tag
+            storage:
+                type: flysystem
+                filesystem: 's3.storage'
+                prefix: 'invoices'
+        receipt:
+            adapter: knp_snappy
+            storage:
+                type: filesystem
+                directory: '%kernel.project_dir%/private/receipts'
 ```
 
 - `default` is always present; name `default` is forbidden under `contexts`
-- Each entry has two fields: `adapter` (string) and `pdf_files_directory` (string|null)
-- `pdf_files_directory` cascades: root -> default/context override
+- Each entry has two fields: `adapter` (string) and `storage` (array|null)
+- `storage` cascades: default -> context override
 - Built-in adapters (`knp_snappy`, `dompdf`) require their packages to be installed; a `LogicException` is thrown otherwise
 - Unknown adapter names are deferred to the compiler pass
 - Adapter-specific options are not configured via YAML; use custom `OptionsProcessorInterface` implementations instead (see Extension Points)
@@ -125,10 +157,13 @@ src/
     Generator/
       PdfFileGenerator.php            # wraps content into PdfFile + saves via manager
       PdfFileGeneratorInterface.php
-    Manager/
-      FilesystemPdfFileManager.php    # stores PDFs on disk per context
-      PdfFileManagerInterface.php
-    Model/PdfFile.php                 # simple model (filename + content + mutable fullPath)
+    Filesystem/
+      Manager/
+        PdfFileManager.php            # delegates to per-context PdfStorageInterface via ServiceLocator
+        PdfFileManagerInterface.php
+      Storage/
+        PdfStorageInterface.php       # context-unaware storage contract
+    Model/PdfFile.php                 # simple model (filename + content + mutable storagePath)
     Processor/
       CompositeOptionsProcessor.php   # chains processors by context
       OptionsProcessorInterface.php
@@ -141,6 +176,13 @@ src/
       HtmlToPdfRendererInterface.php
       TwigToPdfRenderer.php           # Twig -> HTML -> HtmlToPdfRenderer
       TwigToPdfRendererInterface.php
+  Filesystem/
+    Flysystem/
+      FlysystemPdfStorage.php         # Flysystem storage (default, hard dep)
+    Symfony/
+      SymfonyFilesystemPdfStorage.php # Symfony Filesystem storage (optional)
+    Gaufrette/
+      GaufrettePdfStorage.php         # Gaufrette storage (optional)
   Bridge/
     KnpSnappy/
       KnpSnappyAdapter.php           # wraps knplabs/knp-snappy-bundle
@@ -149,7 +191,6 @@ src/
     Dompdf/
       DompdfAdapter.php               # wraps dompdf/dompdf
       DompdfGeneratorProvider.php     # creates fresh Dompdf\Dompdf per call
-      DompdfOptionsProcessor.php      # passes options to Dompdf\Options
   DependencyInjection/
     Compiler/
       RegisterKnpSnappyPrototypePass.php       # clones knp_snappy.pdf as non-shared prototype
@@ -264,7 +305,7 @@ All core services are aliased by interface. Override via Symfony's service decor
 ```yaml
 Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface:     # alias -> sylius_pdf.renderer.html
 Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface:     # alias -> sylius_pdf.renderer.twig
-Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface:         # alias -> sylius_pdf.manager
+Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface:  # alias -> sylius_pdf.manager
 Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface:   # alias -> sylius_pdf.adapter.default
 Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> sylius_pdf.registry.generator_provider
 ```
@@ -280,10 +321,26 @@ Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> s
 ### Dompdf (`dompdf`)
 - Requires: `dompdf/dompdf` ^3.1
 - Pure PHP, no external binary
-- `DompdfOptionsProcessor` passes config options to `Dompdf\Options`
 - `DompdfGeneratorProvider` creates fresh `Dompdf\Dompdf` instances
 
 Both adapters are optional dependencies. Configuring an adapter whose package is not installed throws a `LogicException` with a `composer require` hint.
+
+## Built-in Storage Backends
+
+### Flysystem (`flysystem`) — default
+- Requires: `league/flysystem-bundle` ^3.0 (hard dependency)
+- Constructor: `FilesystemOperator $filesystem, string $prefix = ''`
+- Paths use `/` separator (Flysystem normalizes), sets `storagePath` on saved/retrieved files
+
+### Symfony Filesystem (`filesystem`)
+- Requires: `symfony/filesystem` (optional)
+- Constructor: `Filesystem $filesystem, string $directory`
+- Uses `DIRECTORY_SEPARATOR` for paths, sets `storagePath` on saved/retrieved files
+
+### Gaufrette (`gaufrette`)
+- Requires: `knplabs/knp-gaufrette-bundle` (optional)
+- Constructor: `Filesystem $filesystem, string $prefix = ''`
+- Paths use `/` separator, sets `storagePath` on saved/retrieved files
 
 ## Development
 

@@ -27,10 +27,7 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('pdf_files_directory')
-                    ->defaultValue('%kernel.project_dir%/private/pdf')
-                ->end()
-                ->append($this->addContextNode('default'))
+                ->append($this->addContextNode('default', withStorageDefaults: true))
                 ->arrayNode('contexts')
                     ->useAttributeAsKey('name')
                     ->arrayPrototype()
@@ -38,9 +35,7 @@ final class Configuration implements ConfigurationInterface
                             ->scalarNode('adapter')
                                 ->defaultValue(KnpSnappyAdapter::NAME)
                             ->end()
-                            ->scalarNode('pdf_files_directory')
-                                ->defaultNull()
-                            ->end()
+                            ->append($this->addStorageNode())
                         ->end()
                     ->end()
                     ->validate()
@@ -56,7 +51,7 @@ final class Configuration implements ConfigurationInterface
         return $treeBuilder;
     }
 
-    private function addContextNode(string $name): ArrayNodeDefinition
+    private function addContextNode(string $name, bool $withStorageDefaults = false): ArrayNodeDefinition
     {
         $node = new ArrayNodeDefinition($name);
 
@@ -66,9 +61,81 @@ final class Configuration implements ConfigurationInterface
                 ->scalarNode('adapter')
                     ->defaultValue(KnpSnappyAdapter::NAME)
                 ->end()
-                ->scalarNode('pdf_files_directory')
+                ->append($withStorageDefaults ? $this->addStorageNodeWithDefaults() : $this->addStorageNode())
+            ->end()
+        ;
+
+        return $node;
+    }
+
+    private function addStorageNodeWithDefaults(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('storage');
+
+        $node
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->enumNode('type')
+                    ->values(['flysystem', 'filesystem', 'gaufrette'])
+                    ->defaultValue('flysystem')
+                ->end()
+                ->scalarNode('filesystem')
+                    ->defaultValue('default.storage')
+                ->end()
+                ->scalarNode('prefix')
+                    ->defaultValue('pdf')
+                ->end()
+                ->scalarNode('directory')
                     ->defaultNull()
                 ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(function (array $storage): bool {
+                    return 'filesystem' === $storage['type'] && null === $storage['directory'];
+                })
+                ->thenInvalid('The "directory" option is required when storage type is "filesystem".')
+            ->end()
+            ->validate()
+                ->ifTrue(function (array $storage): bool {
+                    return in_array($storage['type'], ['flysystem', 'gaufrette'], true) && null === $storage['filesystem'];
+                })
+                ->thenInvalid('The "filesystem" option is required when storage type is "flysystem" or "gaufrette".')
+            ->end()
+        ;
+
+        return $node;
+    }
+
+    private function addStorageNode(): ArrayNodeDefinition
+    {
+        $node = new ArrayNodeDefinition('storage');
+
+        $node
+            ->children()
+                ->enumNode('type')
+                    ->values(['flysystem', 'filesystem', 'gaufrette'])
+                ->end()
+                ->scalarNode('filesystem')
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('prefix')
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('directory')
+                    ->defaultNull()
+                ->end()
+            ->end()
+            ->validate()
+                ->ifTrue(function (array $storage): bool {
+                    return 'filesystem' === ($storage['type'] ?? null) && null === ($storage['directory'] ?? null);
+                })
+                ->thenInvalid('The "directory" option is required when storage type is "filesystem".')
+            ->end()
+            ->validate()
+                ->ifTrue(function (array $storage): bool {
+                    return in_array($storage['type'] ?? null, ['flysystem', 'gaufrette'], true) && null === ($storage['filesystem'] ?? null);
+                })
+                ->thenInvalid('The "filesystem" option is required when storage type is "flysystem" or "gaufrette".')
             ->end()
         ;
 

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional\KnpSnappy;
+namespace Tests\Sylius\PdfBundle\Functional\Bridge;
 
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;

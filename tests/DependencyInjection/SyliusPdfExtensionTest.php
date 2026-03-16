@@ -16,8 +16,8 @@ namespace Tests\Sylius\PdfBundle\DependencyInjection;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
 use PHPUnit\Framework\Attributes\Test;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Core\Manager\FilesystemPdfFileManager;
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManager;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
 use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
@@ -26,6 +26,8 @@ use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
+use Sylius\PdfBundle\Filesystem\Flysystem\FlysystemPdfStorage;
+use Sylius\PdfBundle\Filesystem\Symfony\SymfonyFilesystemPdfStorage;
 
 final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 {
@@ -64,47 +66,20 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
     }
 
     #[Test]
-    public function it_loads_default_pdf_files_directory_parameter(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-        ]);
-
-        $this->assertContainerBuilderHasParameter(
-            'sylius_pdf.pdf_files_directory',
-            '%kernel.project_dir%/private/pdf',
-        );
-    }
-
-    #[Test]
-    public function it_loads_custom_pdf_files_directory_parameter(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-            'pdf_files_directory' => '/custom/path',
-        ]);
-
-        $this->assertContainerBuilderHasParameter(
-            'sylius_pdf.pdf_files_directory',
-            '/custom/path',
-        );
-    }
-
-    #[Test]
-    public function it_registers_filesystem_pdf_file_manager_service(): void
+    public function it_registers_pdf_file_manager_service(): void
     {
         $this->load([
             'default' => ['adapter' => 'my_custom'],
         ]);
 
         $this->assertContainerBuilderHasService(
-            'sylius_pdf.manager.filesystem',
-            FilesystemPdfFileManager::class,
+            'sylius_pdf.manager',
+            PdfFileManager::class,
         );
     }
 
     #[Test]
-    public function it_aliases_manager_interface_to_filesystem_manager(): void
+    public function it_aliases_manager_interface_to_manager(): void
     {
         $this->load([
             'default' => ['adapter' => 'my_custom'],
@@ -117,29 +92,72 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
     }
 
     #[Test]
-    public function it_sets_context_pdf_files_directories_parameter(): void
+    public function it_registers_default_flysystem_storage(): void
     {
         $this->load([
             'default' => ['adapter' => 'my_custom'],
         ]);
 
-        $this->assertContainerBuilderHasParameter(
-            'sylius_pdf.context_pdf_files_directories',
-            ['default' => '%kernel.project_dir%/private/pdf'],
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.storage.default',
+            FlysystemPdfStorage::class,
         );
     }
 
     #[Test]
-    public function it_uses_default_block_pdf_files_directory_override(): void
+    public function it_registers_per_context_storage(): void
     {
         $this->load([
-            'default' => ['adapter' => 'my_custom', 'pdf_files_directory' => '/custom/default'],
-            'pdf_files_directory' => '/root/pdf',
+            'default' => ['adapter' => 'my_custom'],
+            'contexts' => [
+                'invoice' => [
+                    'adapter' => 'my_custom',
+                    'storage' => [
+                        'type' => 'filesystem',
+                        'directory' => '/custom/invoices',
+                    ],
+                ],
+            ],
         ]);
 
-        $this->assertContainerBuilderHasParameter(
-            'sylius_pdf.context_pdf_files_directories',
-            ['default' => '/custom/default'],
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.storage.invoice',
+            SymfonyFilesystemPdfStorage::class,
+        );
+    }
+
+    #[Test]
+    public function it_inherits_default_storage_for_context_without_override(): void
+    {
+        $this->load([
+            'default' => ['adapter' => 'my_custom'],
+            'contexts' => [
+                'invoice' => ['adapter' => 'my_custom'],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.storage.invoice',
+            FlysystemPdfStorage::class,
+        );
+    }
+
+    #[Test]
+    public function it_uses_default_block_storage_override(): void
+    {
+        $this->load([
+            'default' => [
+                'adapter' => 'my_custom',
+                'storage' => [
+                    'type' => 'filesystem',
+                    'directory' => '/custom/default',
+                ],
+            ],
+        ]);
+
+        $this->assertContainerBuilderHasService(
+            'sylius_pdf.storage.default',
+            SymfonyFilesystemPdfStorage::class,
         );
     }
 
@@ -354,55 +372,6 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             GeneratorProviderRegistryInterface::class,
             'sylius_pdf.registry.generator_provider',
         );
-    }
-
-    #[Test]
-    public function it_passes_context_directories_to_manager_definition(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-            'pdf_files_directory' => '/root/pdf',
-            'contexts' => [
-                'invoice' => ['adapter' => 'my_custom'],
-            ],
-        ]);
-
-        $this->assertContainerBuilderHasParameter(
-            'sylius_pdf.context_pdf_files_directories',
-            ['default' => '/root/pdf', 'invoice' => '/root/pdf'],
-        );
-    }
-
-    #[Test]
-    public function it_inherits_root_pdf_files_directory_for_context_without_override(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-            'pdf_files_directory' => '/root/pdf',
-            'contexts' => [
-                'invoice' => ['adapter' => 'my_custom'],
-            ],
-        ]);
-
-        /** @var array<string, string> $directories */
-        $directories = $this->container->getParameter('sylius_pdf.context_pdf_files_directories');
-        self::assertSame('/root/pdf', $directories['invoice']);
-    }
-
-    #[Test]
-    public function it_uses_context_pdf_files_directory_override(): void
-    {
-        $this->load([
-            'default' => ['adapter' => 'my_custom'],
-            'pdf_files_directory' => '/root/pdf',
-            'contexts' => [
-                'invoice' => ['adapter' => 'my_custom', 'pdf_files_directory' => '/custom/invoices'],
-            ],
-        ]);
-
-        /** @var array<string, string> $directories */
-        $directories = $this->container->getParameter('sylius_pdf.context_pdf_files_directories');
-        self::assertSame('/custom/invoices', $directories['invoice']);
     }
 
     #[Test]

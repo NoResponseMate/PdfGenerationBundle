@@ -11,23 +11,23 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional\KnpSnappy;
+namespace Tests\Sylius\PdfBundle\Functional\Bridge;
 
-use Knp\Snappy\GeneratorInterface;
+use Dompdf\Dompdf;
 use PHPUnit\Framework\Attributes\Test;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Tests\Sylius\PdfBundle\Application\Kernel;
 
-final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
+final class DompdfPdfFileGenerationTest extends KernelTestCase
 {
     public static function setUpBeforeClass(): void
     {
-        if (!interface_exists(GeneratorInterface::class)) {
-            self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
+        if (!class_exists(Dompdf::class)) {
+            self::markTestSkipped('dompdf/dompdf is not installed.');
         }
     }
 
@@ -40,7 +40,7 @@ final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $kernel = self::bootKernel(['environment' => 'test_snappy']);
+        $kernel = self::bootKernel(['environment' => 'test_dompdf']);
 
         /** @var string $cacheDir */
         $cacheDir = $kernel->getContainer()->getParameter('kernel.cache_dir');
@@ -71,8 +71,8 @@ final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
         $generator = $this->getGenerator();
         $pdfFile = $generator->generate('invoice-001.pdf', $pdfContent);
 
-        self::assertSame($this->pdfDirectory . '/invoice-001.pdf', $pdfFile->fullPath());
-        self::assertFileExists($pdfFile->fullPath());
+        self::assertSame($this->pdfDirectory . '/invoice-001.pdf', $pdfFile->storagePath());
+        self::assertFileExists($pdfFile->storagePath());
     }
 
     #[Test]
@@ -104,8 +104,8 @@ final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
         $manager->remove('temporary.pdf');
 
         self::assertFalse($manager->has('temporary.pdf'));
-        self::assertNotNull($pdfFile->fullPath());
-        self::assertFileDoesNotExist($pdfFile->fullPath());
+        self::assertNotNull($pdfFile->storagePath());
+        self::assertFileDoesNotExist($pdfFile->storagePath());
     }
 
     #[Test]
@@ -119,8 +119,8 @@ final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
         $generator = $this->getGenerator();
         $pdfFile = $generator->generate('invoice-002.pdf', $pdfContent);
 
-        self::assertSame($this->pdfDirectory . '/invoice-002.pdf', $pdfFile->fullPath());
-        self::assertFileExists($pdfFile->fullPath());
+        self::assertSame($this->pdfDirectory . '/invoice-002.pdf', $pdfFile->storagePath());
+        self::assertFileExists($pdfFile->storagePath());
     }
 
     #[Test]
@@ -146,11 +146,12 @@ final class KnpSnappyPdfFileGenerationTest extends KernelTestCase
 
         $pdfFile = $this->getGenerator()->generate('structure.pdf', $pdfContent);
 
-        self::assertNotNull($pdfFile->fullPath());
-        $fileContent = file_get_contents($pdfFile->fullPath());
+        self::assertNotNull($pdfFile->storagePath());
+        $fileContent = file_get_contents($pdfFile->storagePath());
 
         self::assertNotFalse($fileContent);
         self::assertStringStartsWith('%PDF-', $fileContent);
+        self::assertStringContainsString('%%EOF', $fileContent);
         self::assertGreaterThan(0, strlen($fileContent));
     }
 

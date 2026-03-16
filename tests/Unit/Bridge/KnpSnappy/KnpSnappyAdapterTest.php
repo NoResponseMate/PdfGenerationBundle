@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Tests\Sylius\PdfBundle\Unit\Bridge\KnpSnappy;
 
-use Knp\Snappy\AbstractGenerator;
-use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -25,22 +23,25 @@ use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
 
 final class KnpSnappyAdapterTest extends TestCase
 {
-    private AbstractGenerator&MockObject $snappy;
+    /** @var \Knp\Snappy\AbstractGenerator&MockObject */
+    private MockObject $snappy;
 
-    private GeneratorProviderRegistryInterface&MockObject $generatorProviderRegistry;
+    /** @var GeneratorProviderRegistryInterface&MockObject */
+    private MockObject $generatorProviderRegistry;
 
-    private MockObject&OptionsProcessorInterface $processor;
+    /** @var OptionsProcessorInterface&MockObject */
+    private MockObject $processor;
 
     public static function setUpBeforeClass(): void
     {
-        if (!interface_exists(GeneratorInterface::class)) {
+        if (!interface_exists(\Knp\Snappy\GeneratorInterface::class)) {
             self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
         }
     }
 
     protected function setUp(): void
     {
-        $this->snappy = $this->createMock(AbstractGenerator::class);
+        $this->snappy = $this->createMock(\Knp\Snappy\AbstractGenerator::class);
         $this->generatorProviderRegistry = $this->createMock(GeneratorProviderRegistryInterface::class);
         $this->generatorProviderRegistry->method('get')->willReturn($this->snappy);
         $this->processor = $this->createMock(OptionsProcessorInterface::class);

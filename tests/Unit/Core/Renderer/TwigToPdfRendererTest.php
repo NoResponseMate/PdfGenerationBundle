@@ -23,9 +23,11 @@ use Twig\Environment;
 
 final class TwigToPdfRendererTest extends TestCase
 {
-    private Environment&MockObject $twig;
+    /** @var Environment&MockObject */
+    private MockObject $twig;
 
-    private HtmlToPdfRendererInterface&MockObject $htmlToPdfRenderer;
+    /** @var HtmlToPdfRendererInterface&MockObject */
+    private MockObject $htmlToPdfRenderer;
 
     protected function setUp(): void
     {

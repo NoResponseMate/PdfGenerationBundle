@@ -1,0 +1,13 @@
+sylius_pdf:
+    default:
+        adapter: dompdf
+        storage:
+            type: filesystem
+            directory: '%kernel.cache_dir%/pdf'
+    contexts:
+        invoice:
+            adapter: dompdf
+            storage:
+                type: flysystem
+                filesystem: invoice.storage
+                prefix: invoices

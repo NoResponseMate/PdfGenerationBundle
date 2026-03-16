@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sylius\PdfBundle\Core\Generator;
 
-use Sylius\PdfBundle\Core\Manager\PdfFileManagerInterface;
+use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
 use Sylius\PdfBundle\Core\Model\PdfFile;
 
 final class PdfFileGenerator implements PdfFileGeneratorInterface
