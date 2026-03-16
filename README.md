@@ -57,16 +57,16 @@ sylius_pdf:
     default:
         adapter: dompdf
         storage:
-            type: flysystem
-            filesystem: 'default.storage'
-            prefix: 'pdf'
-            local_cache_directory: '%kernel.project_dir%/var/pdf_cache'
+            type: filesystem
+            directory: '%kernel.project_dir%/var/pdf'
     contexts:
         invoice:
             adapter: knp_snappy
             storage:
-                type: filesystem
-                directory: '%kernel.project_dir%/private/invoices'
+                type: flysystem
+                filesystem: 'default.storage'
+                prefix: 'invoices'
+                local_cache_directory: '%kernel.project_dir%/var/pdf_cache'
 ```
 
 | Key                  | Description                                                                |
@@ -74,7 +74,7 @@ sylius_pdf:
 | `default`            | Configuration for the default context (used when no context is specified). |
 | `contexts`           | Named contexts, each with its own adapter and optional storage override.   |
 | `adapter`            | Adapter name: `knp_snappy` (default), `dompdf`, or a custom adapter key.   |
-| `storage.type`       | Storage backend: `flysystem` (default), `filesystem`, or `gaufrette`.      |
+| `storage.type`       | Storage backend: `filesystem` (default), `flysystem`, or `gaufrette`.      |
 | `storage.filesystem` | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).        |
 | `storage.prefix`     | Path prefix for Flysystem/Gaufrette storage.                               |
 | `storage.directory`  | Local directory path (required for `filesystem` type only).                |

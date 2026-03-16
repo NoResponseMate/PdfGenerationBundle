@@ -30,11 +30,11 @@ final class SyliusPdfConfigurationTest extends TestCase
             ['default' => [
                 'adapter' => 'knp_snappy',
                 'storage' => [
-                    'type' => 'flysystem',
-                    'filesystem' => 'default.storage',
+                    'type' => 'filesystem',
+                    'filesystem' => null,
                     'prefix' => 'pdf',
-                    'directory' => null,
-                    'local_cache_directory' => null,
+                    'directory' => '%kernel.project_dir%/var/pdf',
+                    'local_cache_directory' => '%kernel.cache_dir%/pdf',
                 ],
             ]],
             'default',
@@ -74,11 +74,11 @@ final class SyliusPdfConfigurationTest extends TestCase
             ['default' => [
                 'adapter' => 'knp_snappy',
                 'storage' => [
-                    'type' => 'flysystem',
-                    'filesystem' => 'default.storage',
+                    'type' => 'filesystem',
+                    'filesystem' => null,
                     'prefix' => 'pdf',
-                    'directory' => null,
-                    'local_cache_directory' => null,
+                    'directory' => '%kernel.project_dir%/var/pdf',
+                    'local_cache_directory' => '%kernel.cache_dir%/pdf',
                 ],
             ]],
             'default',
@@ -97,10 +97,10 @@ final class SyliusPdfConfigurationTest extends TestCase
                 'adapter' => 'knp_snappy',
                 'storage' => [
                     'type' => 'filesystem',
-                    'filesystem' => 'default.storage',
+                    'filesystem' => null,
                     'prefix' => 'pdf',
                     'directory' => '/custom/path',
-                    'local_cache_directory' => null,
+                    'local_cache_directory' => '%kernel.cache_dir%/pdf',
                 ],
             ]],
             'default',
@@ -138,11 +138,21 @@ final class SyliusPdfConfigurationTest extends TestCase
     }
 
     #[Test]
-    public function it_rejects_filesystem_type_without_directory_in_default(): void
+    public function it_accepts_filesystem_type_with_default_directory_in_default(): void
     {
-        $this->assertConfigurationIsInvalid(
+        $this->assertProcessedConfigurationEquals(
             [['default' => ['storage' => ['type' => 'filesystem']]]],
-            'The "directory" option is required when storage type is "filesystem".',
+            ['default' => [
+                'adapter' => 'knp_snappy',
+                'storage' => [
+                    'type' => 'filesystem',
+                    'filesystem' => null,
+                    'prefix' => 'pdf',
+                    'directory' => '%kernel.project_dir%/var/pdf',
+                    'local_cache_directory' => '%kernel.cache_dir%/pdf',
+                ],
+            ]],
+            'default',
         );
     }
 

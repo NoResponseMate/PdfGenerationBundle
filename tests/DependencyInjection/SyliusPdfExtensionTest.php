@@ -26,7 +26,6 @@ use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
 use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Sylius\PdfBundle\DependencyInjection\SyliusPdfExtension;
-use Sylius\PdfBundle\Filesystem\Flysystem\FlysystemPdfStorage;
 use Sylius\PdfBundle\Filesystem\Symfony\SymfonyFilesystemPdfStorage;
 
 final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
@@ -92,7 +91,7 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
     }
 
     #[Test]
-    public function it_registers_default_flysystem_storage(): void
+    public function it_registers_default_filesystem_storage(): void
     {
         $this->load([
             'default' => ['adapter' => 'my_custom'],
@@ -100,7 +99,7 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService(
             'sylius_pdf.storage.default',
-            FlysystemPdfStorage::class,
+            SymfonyFilesystemPdfStorage::class,
         );
     }
 
@@ -138,7 +137,7 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasService(
             'sylius_pdf.storage.invoice',
-            FlysystemPdfStorage::class,
+            SymfonyFilesystemPdfStorage::class,
         );
     }
 
