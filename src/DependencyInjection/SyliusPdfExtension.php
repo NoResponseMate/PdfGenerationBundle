@@ -54,11 +54,16 @@ final class SyliusPdfExtension extends Extension
         $deferredAdapterContexts = [];
         $loadedAdapterFiles = [];
 
-        if ($this->registerAdapter($container, $loader, 'default', $config['default']['adapter'], $loadedAdapterFiles)) {
-            $adapterReferences['default'] = new Reference('sylius_pdf.adapter.default');
-            $container->setAlias(PdfGenerationAdapterInterface::class, 'sylius_pdf.adapter.default');
-        } else {
-            $deferredAdapterContexts['default'] = $config['default']['adapter'];
+        /** @var string|null $defaultAdapter */
+        $defaultAdapter = $config['default']['adapter'];
+
+        if (null !== $defaultAdapter) {
+            if ($this->registerAdapter($container, $loader, 'default', $defaultAdapter, $loadedAdapterFiles)) {
+                $adapterReferences['default'] = new Reference('sylius_pdf.adapter.default');
+                $container->setAlias(PdfGenerationAdapterInterface::class, 'sylius_pdf.adapter.default');
+            } else {
+                $deferredAdapterContexts['default'] = $defaultAdapter;
+            }
         }
 
         foreach ($config['contexts'] as $contextName => $contextConfig) {

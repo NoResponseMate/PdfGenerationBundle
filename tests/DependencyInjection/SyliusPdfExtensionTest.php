@@ -167,12 +167,23 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
             self::markTestSkipped('knplabs/knp-snappy-bundle is not installed.');
         }
 
-        $this->load();
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
+        ]);
 
         $this->assertContainerBuilderHasAlias(
             PdfGenerationAdapterInterface::class,
             'sylius_pdf.adapter.default',
         );
+    }
+
+    #[Test]
+    public function it_does_not_set_adapter_alias_when_no_default_adapter_configured(): void
+    {
+        $this->load();
+
+        self::assertFalse($this->container->hasAlias(PdfGenerationAdapterInterface::class));
+        self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.default'));
     }
 
     #[Test]
@@ -210,6 +221,7 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
         }
 
         $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
                 'invoice' => ['adapter' => 'my_custom'],
             ],
@@ -255,7 +267,9 @@ final class SyliusPdfExtensionTest extends AbstractExtensionTestCase
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('The "knp_snappy" adapter is configured for the "default" context, but its required dependency');
 
-        $this->load();
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
+        ]);
     }
 
     #[Test]

@@ -23,12 +23,12 @@ final class SyliusPdfConfigurationTest extends TestCase
     use ConfigurationTestCaseTrait;
 
     #[Test]
-    public function it_has_knp_snappy_as_default_adapter(): void
+    public function it_has_no_default_adapter(): void
     {
         $this->assertProcessedConfigurationEquals(
             [[]],
             ['default' => [
-                'adapter' => 'knp_snappy',
+                'adapter' => null,
                 'storage' => [
                     'type' => 'filesystem',
                     'filesystem' => null,
@@ -58,6 +58,15 @@ final class SyliusPdfConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function it_rejects_context_without_adapter(): void
+    {
+        $this->assertConfigurationIsInvalid(
+            [['contexts' => ['invoice' => []]]],
+            'adapter',
+        );
+    }
+
+    #[Test]
     public function it_rejects_context_named_default(): void
     {
         $this->assertConfigurationIsInvalid(
@@ -72,7 +81,7 @@ final class SyliusPdfConfigurationTest extends TestCase
         $this->assertProcessedConfigurationEquals(
             [[]],
             ['default' => [
-                'adapter' => 'knp_snappy',
+                'adapter' => null,
                 'storage' => [
                     'type' => 'filesystem',
                     'filesystem' => null,
@@ -94,7 +103,7 @@ final class SyliusPdfConfigurationTest extends TestCase
                 'directory' => '/custom/path',
             ]]]],
             ['default' => [
-                'adapter' => 'knp_snappy',
+                'adapter' => null,
                 'storage' => [
                     'type' => 'filesystem',
                     'filesystem' => null,
@@ -143,7 +152,7 @@ final class SyliusPdfConfigurationTest extends TestCase
         $this->assertProcessedConfigurationEquals(
             [['default' => ['storage' => ['type' => 'filesystem']]]],
             ['default' => [
-                'adapter' => 'knp_snappy',
+                'adapter' => null,
                 'storage' => [
                     'type' => 'filesystem',
                     'filesystem' => null,
@@ -160,7 +169,7 @@ final class SyliusPdfConfigurationTest extends TestCase
     public function it_rejects_filesystem_type_without_directory_in_context(): void
     {
         $this->assertConfigurationIsInvalid(
-            [['contexts' => ['invoice' => ['storage' => ['type' => 'filesystem']]]]],
+            [['contexts' => ['invoice' => ['adapter' => 'dompdf', 'storage' => ['type' => 'filesystem']]]]],
             'The "directory" option is required when storage type is "filesystem".',
         );
     }

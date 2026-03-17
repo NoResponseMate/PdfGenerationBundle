@@ -31,12 +31,22 @@ final class SyliusPdfExtensionKnpSnappyTest extends AbstractExtensionTestCase
     #[Test]
     public function it_registers_knp_snappy_adapter_as_default(): void
     {
-        $this->load();
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
+        ]);
 
         $this->assertContainerBuilderHasServiceDefinitionWithParent(
             'sylius_pdf.adapter.default',
             'sylius_pdf.adapter.knp_snappy',
         );
+    }
+
+    #[Test]
+    public function it_does_not_register_default_adapter_when_not_configured(): void
+    {
+        $this->load();
+
+        self::assertFalse($this->container->hasDefinition('sylius_pdf.adapter.default'));
     }
 
     #[Test]
@@ -63,7 +73,9 @@ final class SyliusPdfExtensionKnpSnappyTest extends AbstractExtensionTestCase
     #[Test]
     public function it_creates_composite_options_processor(): void
     {
-        $this->load();
+        $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
+        ]);
 
         $this->assertContainerBuilderHasService(
             'sylius_pdf.options_processor.composite.knp_snappy',
@@ -75,6 +87,7 @@ final class SyliusPdfExtensionKnpSnappyTest extends AbstractExtensionTestCase
     public function it_loads_adapter_services_file_only_once_for_multiple_contexts(): void
     {
         $this->load([
+            'default' => ['adapter' => 'knp_snappy'],
             'contexts' => [
                 'invoice' => ['adapter' => 'knp_snappy'],
             ],
