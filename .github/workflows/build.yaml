@@ -23,6 +23,7 @@ jobs:
                 scenario:
                     - full_snappy
                     - full_dompdf
+                    - full_gotenberg
                     - filesystem_storage
                     - flysystem_storage
                     - gaufrette_storage
@@ -32,6 +33,8 @@ jobs:
                     - snappy_unavailable
                     - dompdf
                     - dompdf_unavailable
+                    - gotenberg
+                    - gotenberg_unavailable
 
                 exclude:
                     -   php: "8.2"
@@ -116,6 +119,30 @@ jobs:
                         app_env: test_dompdf
                         install_wkhtmltopdf: false
                         remove_packages: "dompdf/dompdf knplabs/knp-snappy-bundle"
+
+                    -   scenario: full_gotenberg
+                        name: "Full (Gotenberg default)"
+                        app_env: test_gotenberg
+                        install_wkhtmltopdf: false
+                        remove_packages: ""
+
+                    -   scenario: gotenberg
+                        name: "Gotenberg"
+                        app_env: test_gotenberg
+                        install_wkhtmltopdf: false
+                        remove_packages: "knplabs/knp-snappy-bundle dompdf/dompdf"
+
+                    -   scenario: gotenberg_unavailable
+                        name: "Gotenberg (unavailable)"
+                        app_env: test_gotenberg
+                        install_wkhtmltopdf: false
+                        remove_packages: "gotenberg/gotenberg-php knplabs/knp-snappy-bundle dompdf/dompdf"
+
+        services:
+            gotenberg:
+                image: gotenberg/gotenberg:8
+                ports:
+                    - 3000:3000
 
         env:
             APP_ENV: ${{ matrix.app_env }}

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Sylius\PdfBundle\DependencyInjection;
 
 use Sylius\PdfBundle\Bridge\Dompdf\DompdfAdapter;
+use Sylius\PdfBundle\Bridge\Gotenberg\GotenbergAdapter;
 use Sylius\PdfBundle\Bridge\KnpSnappy\KnpSnappyAdapter;
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
@@ -35,6 +36,7 @@ final class SyliusPdfExtension extends Extension
     private const ADAPTER_REQUIRED = [
         KnpSnappyAdapter::NAME => ['class' => \Knp\Snappy\GeneratorInterface::class, 'package' => 'knplabs/knp-snappy-bundle'],
         DompdfAdapter::NAME => ['class' => \Dompdf\Dompdf::class, 'package' => 'dompdf/dompdf'],
+        GotenbergAdapter::NAME => ['class' => \Gotenberg\Gotenberg::class, 'package' => 'gotenberg/gotenberg-php'],
     ];
 
     private const STORAGE_REQUIRED = [
@@ -49,6 +51,10 @@ final class SyliusPdfExtension extends Extension
 
         $loader = new PhpFileLoader($container, new FileLocator(__DIR__ . '/../../config'));
         $loader->load('services.php');
+
+        /** @var string $gotenbergBaseUrl */
+        $gotenbergBaseUrl = $config['gotenberg']['base_url'];
+        $container->setParameter('sylius_pdf.gotenberg.base_url', $gotenbergBaseUrl);
 
         $adapterReferences = [];
         $deferredAdapterContexts = [];

@@ -21,12 +21,11 @@ return static function (ECSConfig $config): void {
     $config->import('vendor/sylius-labs/coding-standard/ecs.php');
 
     $config->parallel();
-    $config->paths(['src', 'tests']);
+    $config->paths(['src', 'tests/DependencyInjection', 'tests/Functional', 'tests/Unit']);
     $config->skip([
         InlineDocCommentDeclarationSniff::class . '.MissingVariable',
         InlineDocCommentDeclarationSniff::class . '.NoAssignment',
         '**/var/*',
-        'tests/Application/**',
     ]);
     $config->ruleWithConfiguration(OrderedTypesFixer::class, ['null_adjustment' => 'always_last']);
     $config->ruleWithConfiguration(NullableTypeDeclarationForDefaultNullValueFixer::class, ['use_nullable_type_declaration' => true]);

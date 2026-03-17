@@ -18,10 +18,11 @@ This bundle decouples PDF rendering from application-specific logic by providing
 
 **Built-in adapters:**
 
-| Adapter      | Library                                                                 | Requires             |
-|--------------|-------------------------------------------------------------------------|----------------------|
-| `knp_snappy` | [knplabs/knp-snappy-bundle](https://github.com/KnpLabs/KnpSnappyBundle) | `wkhtmltopdf` binary |
-| `dompdf`     | [dompdf/dompdf](https://github.com/dompdf/dompdf)                       | Nothing (pure PHP)   |
+| Adapter      | Library                                                                     | Requires                    |
+|--------------|-----------------------------------------------------------------------------|-----------------------------|
+| `knp_snappy` | [knplabs/knp-snappy-bundle](https://github.com/KnpLabs/KnpSnappyBundle)    | `wkhtmltopdf` binary        |
+| `dompdf`     | [dompdf/dompdf](https://github.com/dompdf/dompdf)                           | Nothing (pure PHP)          |
+| `gotenberg`  | [gotenberg/gotenberg-php](https://github.com/gotenberg/gotenberg-php)       | Running Gotenberg container |
 
 ## Installation
 
@@ -29,7 +30,7 @@ This bundle decouples PDF rendering from application-specific logic by providing
 composer require sylius/pdf-bundle
 ```
 
-Install one or both adapter libraries depending on your needs:
+Install an adapter library depending on your needs:
 
 ```bash
 # For wkhtmltopdf-based rendering
@@ -37,6 +38,9 @@ composer require knplabs/knp-snappy-bundle
 
 # For pure PHP rendering (no external binary)
 composer require dompdf/dompdf
+
+# For Gotenberg (Docker-based headless Chromium)
+composer require gotenberg/gotenberg-php
 ```
 
 Register the bundle if your application doesn't use Symfony Flex:
@@ -54,6 +58,8 @@ return [
 ```yaml
 # config/packages/sylius_pdf.yaml
 sylius_pdf:
+    gotenberg:
+        base_url: 'http://localhost:3000'
     default:
         adapter: dompdf
         storage:
@@ -69,16 +75,17 @@ sylius_pdf:
                 local_cache_directory: '%kernel.project_dir%/var/pdf_cache'
 ```
 
-| Key                  | Description                                                                |
-|----------------------|----------------------------------------------------------------------------|
-| `default`            | Configuration for the default context (used when no context is specified). |
-| `contexts`           | Named contexts, each with its own adapter and optional storage override.   |
-| `adapter`            | Adapter name: `knp_snappy` (default), `dompdf`, or a custom adapter key.   |
-| `storage.type`       | Storage backend: `filesystem` (default), `flysystem`, or `gaufrette`.      |
-| `storage.filesystem` | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).        |
-| `storage.prefix`     | Path prefix for Flysystem/Gaufrette storage.                               |
-| `storage.directory`  | Local directory path (required for `filesystem` type only).                |
-| `storage.local_cache_directory` | Local cache path for `resolveLocalPath()` (Flysystem/Gaufrette only). |
+| Key                  | Description                                                                           |
+|----------------------|---------------------------------------------------------------------------------------|
+| `default`            | Configuration for the default context (used when no context is specified).            |
+| `contexts`           | Named contexts, each with its own adapter and optional storage override.              |
+| `adapter`            | Adapter name: `knp_snappy`, `dompdf`, `gotenberg`, or a custom adapter key.           |
+| `gotenberg.base_url` | URL of the Gotenberg server (default: `http://localhost:3000`). Required when using the `gotenberg` adapter. |
+| `storage.type`       | Storage backend: `filesystem` (default), `flysystem`, or `gaufrette`.                 |
+| `storage.filesystem` | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).                   |
+| `storage.prefix`     | Path prefix for Flysystem/Gaufrette storage.                                          |
+| `storage.directory`  | Local directory path (required for `filesystem` type only).                           |
+| `storage.local_cache_directory` | Local cache path for `resolveLocalPath()` (Flysystem/Gaufrette only).      |
 
 Each context (including `default`) can override `storage`. When omitted, the default storage configuration is inherited. The context name `default` is reserved and cannot be used inside `contexts`.
 
@@ -175,8 +182,8 @@ $localPath = $this->manager->resolveLocalPath('report.pdf', 'invoice');
 use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
 
-#[AsPdfGenerationAdapter('gotenberg')]
-final class GotenbergAdapter implements PdfGenerationAdapterInterface
+#[AsPdfGenerationAdapter('my_adapter')]
+final class MyCustomAdapter implements PdfGenerationAdapterInterface
 {
     public function generate(string $html): string
     {
@@ -189,9 +196,9 @@ final class GotenbergAdapter implements PdfGenerationAdapterInterface
 
 ```yaml
 services:
-    App\Pdf\GotenbergAdapter:
+    App\Pdf\MyCustomAdapter:
         tags:
-            - { name: 'sylius_pdf.adapter', key: 'gotenberg' }
+            - { name: 'sylius_pdf.adapter', key: 'my_adapter' }
 ```
 
 Then reference it by key in configuration:
@@ -199,7 +206,7 @@ Then reference it by key in configuration:
 ```yaml
 sylius_pdf:
     default:
-        adapter: gotenberg
+        adapter: my_adapter
 ```
 
 Custom adapters are user-managed services - the bundle does not pass configuration options to them.

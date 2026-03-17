@@ -118,8 +118,10 @@ When processing context `default`, only: ProcessorA, ProcessorB.
 
 ```yaml
 sylius_pdf:
+    gotenberg:
+        base_url: 'http://localhost:3000'  # Gotenberg server URL (default)
     default:
-        adapter: knp_snappy               # knp_snappy | dompdf | <custom_key>
+        adapter: knp_snappy               # knp_snappy | dompdf | gotenberg | <custom_key>
         storage:                           # storage defaults for all contexts
             type: flysystem                # flysystem | filesystem | gaufrette
             filesystem: 'default.storage'  # service ID (flysystem/gaufrette)
@@ -144,7 +146,7 @@ sylius_pdf:
 - `default` is always present; name `default` is forbidden under `contexts`
 - Each entry has two fields: `adapter` (string) and `storage` (array|null)
 - `storage` cascades: default -> context override
-- Built-in adapters (`knp_snappy`, `dompdf`) require their packages to be installed; a `LogicException` is thrown otherwise
+- Built-in adapters (`knp_snappy`, `dompdf`, `gotenberg`) require their packages to be installed; a `LogicException` is thrown otherwise
 - Unknown adapter names are deferred to the compiler pass
 - Adapter-specific options are not configured via YAML; use custom `OptionsProcessorInterface` implementations instead (see Extension Points)
 
@@ -195,6 +197,9 @@ src/
     Dompdf/
       DompdfAdapter.php               # wraps dompdf/dompdf
       DompdfGeneratorProvider.php     # creates fresh Dompdf\Dompdf per call
+    Gotenberg/
+      GotenbergAdapter.php            # wraps gotenberg/gotenberg-php
+      GotenbergGeneratorProvider.php  # creates fresh ChromiumPdf builder per call
   DependencyInjection/
     Compiler/
       RegisterKnpSnappyPrototypePass.php       # clones knp_snappy.pdf as non-shared prototype
@@ -208,6 +213,7 @@ config/
   services.php                # core services (HtmlToPdfRenderer, TwigToPdfRenderer, manager, registry)
   adapter/knp_snappy.php      # KnpSnappy adapter + processor + provider (abstract)
   adapter/dompdf.php          # Dompdf adapter + processor + provider (abstract)
+  adapter/gotenberg.php       # Gotenberg adapter + provider (abstract)
 ```
 
 ## Extension Points
@@ -327,7 +333,14 @@ Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> s
 - Pure PHP, no external binary
 - `DompdfGeneratorProvider` creates fresh `Dompdf\Dompdf` instances
 
-Both adapters are optional dependencies. Configuring an adapter whose package is not installed throws a `LogicException` with a `composer require` hint.
+### Gotenberg (`gotenberg`)
+- Requires: `gotenberg/gotenberg-php` ^2.0
+- Uses Gotenberg's Docker-based API with headless Chromium for HTML-to-PDF conversion
+- `GotenbergGeneratorProvider` creates a fresh `ChromiumPdf` builder per call, connecting to the Gotenberg server at the configured `base_url`
+- Adapter flow: gets `ChromiumPdf` builder → processes options → calls `$builder->html(Stream::string(...))` to build the request → sends via `Gotenberg::send()` → returns PDF bytes
+- Configure the Gotenberg server URL via `sylius_pdf.gotenberg.base_url` (defaults to `http://localhost:3000`)
+
+All adapters are optional dependencies. Configuring an adapter whose package is not installed throws a `LogicException` with a `composer require` hint.
 
 ## Built-in Storage Backends
 

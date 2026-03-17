@@ -26,6 +26,12 @@ final class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->arrayNode('gotenberg')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('base_url')->defaultValue('http://localhost:3000')->end()
+                    ->end()
+                ->end()
                 ->append($this->addContextNode('default', withStorageDefaults: true))
                 ->arrayNode('contexts')
                     ->useAttributeAsKey('name')
