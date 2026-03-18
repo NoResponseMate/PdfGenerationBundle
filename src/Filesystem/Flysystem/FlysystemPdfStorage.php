@@ -11,12 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Filesystem\Flysystem;
+namespace Sylius\PdfGenerationBundle\Filesystem\Flysystem;
 
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\UnableToReadFile;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 use Symfony\Component\Filesystem\Filesystem as LocalFilesystem;
 
 final class FlysystemPdfStorage implements PdfStorageInterface

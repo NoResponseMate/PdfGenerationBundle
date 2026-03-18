@@ -11,15 +11,15 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Core\Filesystem\Manager;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Core\Filesystem\Manager;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManager;
-use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManager;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class PdfFileManagerTest extends TestCase

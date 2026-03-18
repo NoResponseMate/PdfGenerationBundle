@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class RegisterKnpSnappyPrototypePass implements CompilerPassInterface
 {
-    public const PROTOTYPE_SERVICE_ID = 'sylius_pdf.knp_snappy.pdf_prototype';
+    public const PROTOTYPE_SERVICE_ID = 'sylius_pdf_generation.knp_snappy.pdf_prototype';
 
     public function process(ContainerBuilder $container): void
     {

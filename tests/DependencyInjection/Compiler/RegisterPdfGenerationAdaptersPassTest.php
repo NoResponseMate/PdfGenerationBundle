@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
-use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterPdfGenerationAdaptersPass;
+use Sylius\PdfGenerationBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRenderer;
+use Sylius\PdfGenerationBundle\DependencyInjection\Compiler\RegisterPdfGenerationAdaptersPass;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -30,9 +30,9 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
-            new ServiceLocatorArgument(['default' => new Reference('sylius_pdf.adapter.default')]),
+            new ServiceLocatorArgument(['default' => new Reference('sylius_pdf_generation.adapter.default')]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();
         $pass->process($container);
@@ -49,14 +49,14 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
         $customAdapterDefinition = new Definition(\stdClass::class);
-        $customAdapterDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
+        $customAdapterDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'my_custom']);
         $container->setDefinition('app.adapter.custom', $customAdapterDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();
@@ -76,17 +76,17 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $container = new ContainerBuilder();
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([
-                'default' => new Reference('sylius_pdf.adapter.default'),
+                'default' => new Reference('sylius_pdf_generation.adapter.default'),
             ]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
         $customAdapterDefinition = new Definition(\stdClass::class);
-        $customAdapterDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
+        $customAdapterDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'my_custom']);
         $container->setDefinition('app.adapter.custom', $customAdapterDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();
@@ -99,7 +99,7 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         self::assertCount(2, $values);
         self::assertArrayHasKey('default', $values);
         self::assertArrayHasKey('invoice', $values);
-        self::assertSame('sylius_pdf.adapter.default', (string) $values['default']);
+        self::assertSame('sylius_pdf_generation.adapter.default', (string) $values['default']);
         self::assertSame('app.adapter.custom', (string) $values['invoice']);
     }
 
@@ -110,14 +110,14 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'default' => 'my_custom',
         ]);
 
         $customAdapterDefinition = new Definition(\stdClass::class);
-        $customAdapterDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
+        $customAdapterDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'my_custom']);
         $container->setDefinition('app.adapter.custom', $customAdapterDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();
@@ -134,9 +134,9 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'invoice' => 'nonexistent_adapter',
         ]);
 
@@ -155,20 +155,20 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
         $customAdapterDefinition = new Definition(\stdClass::class);
-        $customAdapterDefinition->addTag('sylius_pdf.adapter');
+        $customAdapterDefinition->addTag('sylius_pdf_generation.adapter');
         $container->setDefinition('app.adapter.custom', $customAdapterDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "app.adapter.custom" tagged with "sylius_pdf.adapter" must have a "key" attribute.');
+        $this->expectExceptionMessage('The service "app.adapter.custom" tagged with "sylius_pdf_generation.adapter" must have a "key" attribute.');
 
         $pass->process($container);
     }
@@ -180,18 +180,18 @@ final class RegisterPdfGenerationAdaptersPassTest extends TestCase
         $rendererDefinition = new Definition(HtmlToPdfRenderer::class, [
             new ServiceLocatorArgument([]),
         ]);
-        $container->setDefinition('sylius_pdf.renderer.html', $rendererDefinition);
+        $container->setDefinition('sylius_pdf_generation.renderer.html', $rendererDefinition);
 
-        $container->setParameter('.sylius_pdf.deferred_adapter_contexts', [
+        $container->setParameter('.sylius_pdf_generation.deferred_adapter_contexts', [
             'invoice' => 'my_custom',
         ]);
 
         $firstDefinition = new Definition(\stdClass::class);
-        $firstDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
+        $firstDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'my_custom']);
         $container->setDefinition('app.adapter.first', $firstDefinition);
 
         $secondDefinition = new Definition(\stdClass::class);
-        $secondDefinition->addTag('sylius_pdf.adapter', ['key' => 'my_custom']);
+        $secondDefinition->addTag('sylius_pdf_generation.adapter', ['key' => 'my_custom']);
         $container->setDefinition('app.adapter.second', $secondDefinition);
 
         $pass = new RegisterPdfGenerationAdaptersPass();

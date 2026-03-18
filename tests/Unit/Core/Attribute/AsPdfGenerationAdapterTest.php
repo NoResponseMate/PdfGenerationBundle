@@ -11,11 +11,11 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Core\Attribute;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Core\Attribute;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfGenerationBundle\Core\Attribute\AsPdfGenerationAdapter;
 
 final class AsPdfGenerationAdapterTest extends TestCase
 {

@@ -11,16 +11,16 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Filesystem\Flysystem;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Filesystem\Flysystem;
 
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\UnableToReadFile;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
-use Sylius\PdfBundle\Filesystem\Flysystem\FlysystemPdfStorage;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Filesystem\Flysystem\FlysystemPdfStorage;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class FlysystemPdfStorageTest extends TestCase

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Provider;
+namespace Sylius\PdfGenerationBundle\Core\Provider;
 
 interface GeneratorProviderInterface
 {

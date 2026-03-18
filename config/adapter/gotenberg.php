@@ -11,8 +11,8 @@
 
 declare(strict_types=1);
 
-use Sylius\PdfBundle\Bridge\Gotenberg\GotenbergAdapter;
-use Sylius\PdfBundle\Bridge\Gotenberg\GotenbergGeneratorProvider;
+use Sylius\PdfGenerationBundle\Adapter\Gotenberg\GotenbergAdapter;
+use Sylius\PdfGenerationBundle\Adapter\Gotenberg\GotenbergGeneratorProvider;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
@@ -22,19 +22,19 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    $services->set('sylius_pdf.generator_provider.gotenberg', GotenbergGeneratorProvider::class)
+    $services->set('sylius_pdf_generation.generator_provider.gotenberg', GotenbergGeneratorProvider::class)
         ->args([
-            param('sylius_pdf.gotenberg.base_url'),
+            param('sylius_pdf_generation.gotenberg.base_url'),
         ])
-        ->tag('sylius_pdf.generator_provider', ['adapter' => GotenbergAdapter::NAME])
+        ->tag('sylius_pdf_generation.generator_provider', ['adapter' => GotenbergAdapter::NAME])
     ;
 
-    $services->set('sylius_pdf.adapter.gotenberg', GotenbergAdapter::class)
+    $services->set('sylius_pdf_generation.adapter.gotenberg', GotenbergAdapter::class)
         ->abstract()
         ->args([
-            service('sylius_pdf.registry.generator_provider'),
-            service('sylius_pdf.options_processor.composite.gotenberg'),
-            abstract_arg('context name, set by SyliusPdfExtension'),
+            service('sylius_pdf_generation.registry.generator_provider'),
+            service('sylius_pdf_generation.options_processor.composite.gotenberg'),
+            abstract_arg('context name, set by SyliusPdfGenerationExtension'),
         ])
     ;
 };

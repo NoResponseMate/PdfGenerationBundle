@@ -1,8 +1,0 @@
-sylius_pdf:
-    gotenberg:
-        base_url: 'http://localhost:3000'
-    default:
-        adapter: gotenberg
-        storage:
-            type: filesystem
-            directory: '%kernel.cache_dir%/pdf'

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Application;
+namespace Tests\Sylius\PdfGenerationBundle\Application;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;

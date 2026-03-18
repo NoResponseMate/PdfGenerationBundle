@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Registry;
+namespace Sylius\PdfGenerationBundle\Core\Registry;
 
-use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
+use Sylius\PdfGenerationBundle\Core\Provider\GeneratorProviderInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class GeneratorProviderRegistry implements GeneratorProviderRegistryInterface

@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Model;
+namespace Sylius\PdfGenerationBundle\Core\Model;
 
 final class PdfFile
 {

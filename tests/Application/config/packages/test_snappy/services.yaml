@@ -1,21 +1,21 @@
 services:
-    Tests\Sylius\PdfBundle\Functional\Stub\StubSnappyGenerator: ~
+    Tests\Sylius\PdfGenerationBundle\Functional\Stub\StubSnappyGenerator: ~
 
     knp_snappy.pdf:
-        class: Tests\Sylius\PdfBundle\Functional\Stub\StubSnappyGenerator
+        class: Tests\Sylius\PdfGenerationBundle\Functional\Stub\StubSnappyGenerator
 
-    test.sylius_pdf.renderer.html:
-        alias: 'sylius_pdf.renderer.html'
+    test.sylius_pdf_generation.renderer.html:
+        alias: 'sylius_pdf_generation.renderer.html'
         public: true
 
-    test.sylius_pdf.renderer.twig:
-        alias: 'sylius_pdf.renderer.twig'
+    test.sylius_pdf_generation.renderer.twig:
+        alias: 'sylius_pdf_generation.renderer.twig'
         public: true
 
-    test.sylius_pdf.generator:
-        alias: 'sylius_pdf.generator'
+    test.sylius_pdf_generation.generator:
+        alias: 'sylius_pdf_generation.generator'
         public: true
 
-    test.sylius_pdf.manager:
-        alias: 'sylius_pdf.manager'
+    test.sylius_pdf_generation.manager:
+        alias: 'sylius_pdf_generation.manager'
         public: true

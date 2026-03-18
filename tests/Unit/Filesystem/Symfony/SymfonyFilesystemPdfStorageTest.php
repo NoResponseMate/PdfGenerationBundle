@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Filesystem\Symfony;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Filesystem\Symfony;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
-use Sylius\PdfBundle\Filesystem\Symfony\SymfonyFilesystemPdfStorage;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Filesystem\Symfony\SymfonyFilesystemPdfStorage;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class SymfonyFilesystemPdfStorageTest extends TestCase

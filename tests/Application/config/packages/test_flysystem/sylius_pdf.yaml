@@ -1,8 +1,0 @@
-sylius_pdf:
-    default:
-        adapter: dompdf
-        storage:
-            type: flysystem
-            filesystem: pdf.storage
-            prefix: pdf
-            local_cache_directory: '%kernel.cache_dir%/pdf_local_cache'

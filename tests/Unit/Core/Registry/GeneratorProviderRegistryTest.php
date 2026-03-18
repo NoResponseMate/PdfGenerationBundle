@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Core\Registry;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Core\Registry;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
+use Sylius\PdfGenerationBundle\Core\Provider\GeneratorProviderInterface;
+use Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistry;
+use Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistryInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class GeneratorProviderRegistryTest extends TestCase

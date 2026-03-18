@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Core\Renderer;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Core\Renderer;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
-use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfGenerationBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRenderer;
+use Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRendererInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class HtmlToPdfRendererTest extends TestCase

@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Filesystem\Storage;
+namespace Sylius\PdfGenerationBundle\Core\Filesystem\Storage;
 
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 
 interface PdfStorageInterface
 {

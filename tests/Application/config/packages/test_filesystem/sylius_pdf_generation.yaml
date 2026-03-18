@@ -1,0 +1,6 @@
+sylius_pdf_generation:
+    default:
+        adapter: dompdf
+        storage:
+            type: filesystem
+            directory: '%kernel.cache_dir%/pdf'

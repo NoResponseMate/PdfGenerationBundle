@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
-use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
-use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterOptionsProcessorsPass;
+use Sylius\PdfGenerationBundle\Core\Processor\CompositeOptionsProcessor;
+use Sylius\PdfGenerationBundle\Core\Processor\OptionsProcessorInterface;
+use Sylius\PdfGenerationBundle\DependencyInjection\Compiler\RegisterOptionsProcessorsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
@@ -32,7 +32,7 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
 
         $pass->process($container);
 
-        self::assertFalse($container->hasDefinition('sylius_pdf.options_processor.composite.knp_snappy'));
+        self::assertFalse($container->hasDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy'));
     }
 
     #[Test]
@@ -41,15 +41,15 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $processor = new Definition(OptionsProcessorInterface::class);
-        $processor->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy']);
+        $processor->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy']);
         $container->setDefinition('app.processor', $processor);
 
         $pass = new RegisterOptionsProcessorsPass();
         $pass->process($container);
 
-        self::assertTrue($container->hasDefinition('sylius_pdf.options_processor.composite.knp_snappy'));
+        self::assertTrue($container->hasDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy'));
 
-        $compositeDefinition = $container->getDefinition('sylius_pdf.options_processor.composite.knp_snappy');
+        $compositeDefinition = $container->getDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy');
         self::assertSame(CompositeOptionsProcessor::class, $compositeDefinition->getClass());
     }
 
@@ -59,14 +59,14 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $processor = new Definition(OptionsProcessorInterface::class);
-        $processor->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy']);
+        $processor->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy']);
         $container->setDefinition('app.processor', $processor);
 
         $pass = new RegisterOptionsProcessorsPass();
         $pass->process($container);
 
         /** @var array<string, list<Reference>> $contextReferences */
-        $contextReferences = $container->getDefinition('sylius_pdf.options_processor.composite.knp_snappy')->getArgument(0);
+        $contextReferences = $container->getDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy')->getArgument(0);
 
         self::assertArrayHasKey('default', $contextReferences);
         self::assertCount(1, $contextReferences['default']);
@@ -79,14 +79,14 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $processor = new Definition(OptionsProcessorInterface::class);
-        $processor->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy', 'context' => 'invoice']);
+        $processor->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy', 'context' => 'invoice']);
         $container->setDefinition('app.processor', $processor);
 
         $pass = new RegisterOptionsProcessorsPass();
         $pass->process($container);
 
         /** @var array<string, list<Reference>> $contextReferences */
-        $contextReferences = $container->getDefinition('sylius_pdf.options_processor.composite.knp_snappy')->getArgument(0);
+        $contextReferences = $container->getDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy')->getArgument(0);
 
         self::assertArrayHasKey('invoice', $contextReferences);
         self::assertArrayNotHasKey('default', $contextReferences);
@@ -98,18 +98,18 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $low = new Definition(OptionsProcessorInterface::class);
-        $low->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy', 'priority' => 0]);
+        $low->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy', 'priority' => 0]);
         $container->setDefinition('app.low_priority', $low);
 
         $high = new Definition(OptionsProcessorInterface::class);
-        $high->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy', 'priority' => 10]);
+        $high->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy', 'priority' => 10]);
         $container->setDefinition('app.high_priority', $high);
 
         $pass = new RegisterOptionsProcessorsPass();
         $pass->process($container);
 
         /** @var array<string, list<Reference>> $contextReferences */
-        $contextReferences = $container->getDefinition('sylius_pdf.options_processor.composite.knp_snappy')->getArgument(0);
+        $contextReferences = $container->getDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy')->getArgument(0);
 
         self::assertCount(2, $contextReferences['default']);
         self::assertEquals(new Reference('app.high_priority'), $contextReferences['default'][0]);
@@ -122,18 +122,18 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $snappyProcessor = new Definition(OptionsProcessorInterface::class);
-        $snappyProcessor->addTag('sylius_pdf.options_processor', ['adapter' => 'knp_snappy']);
+        $snappyProcessor->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'knp_snappy']);
         $container->setDefinition('app.snappy_processor', $snappyProcessor);
 
         $dompdfProcessor = new Definition(OptionsProcessorInterface::class);
-        $dompdfProcessor->addTag('sylius_pdf.options_processor', ['adapter' => 'dompdf']);
+        $dompdfProcessor->addTag('sylius_pdf_generation.options_processor', ['adapter' => 'dompdf']);
         $container->setDefinition('app.dompdf_processor', $dompdfProcessor);
 
         $pass = new RegisterOptionsProcessorsPass();
         $pass->process($container);
 
-        self::assertTrue($container->hasDefinition('sylius_pdf.options_processor.composite.knp_snappy'));
-        self::assertTrue($container->hasDefinition('sylius_pdf.options_processor.composite.dompdf'));
+        self::assertTrue($container->hasDefinition('sylius_pdf_generation.options_processor.composite.knp_snappy'));
+        self::assertTrue($container->hasDefinition('sylius_pdf_generation.options_processor.composite.dompdf'));
     }
 
     #[Test]
@@ -142,13 +142,13 @@ final class RegisterOptionsProcessorsPassTest extends TestCase
         $container = new ContainerBuilder();
 
         $processor = new Definition(OptionsProcessorInterface::class);
-        $processor->addTag('sylius_pdf.options_processor', []);
+        $processor->addTag('sylius_pdf_generation.options_processor', []);
         $container->setDefinition('app.processor', $processor);
 
         $pass = new RegisterOptionsProcessorsPass();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "app.processor" tagged with "sylius_pdf.options_processor" must have an "adapter" attribute.');
+        $this->expectExceptionMessage('The service "app.processor" tagged with "sylius_pdf_generation.options_processor" must have an "adapter" attribute.');
 
         $pass->process($container);
     }

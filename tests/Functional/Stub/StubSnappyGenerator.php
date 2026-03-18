@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional\Stub;
+namespace Tests\Sylius\PdfGenerationBundle\Functional\Stub;
 
 use Knp\Snappy\AbstractGenerator;
 

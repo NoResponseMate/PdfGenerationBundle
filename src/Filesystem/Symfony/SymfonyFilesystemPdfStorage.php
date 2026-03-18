@@ -11,10 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Filesystem\Symfony;
+namespace Sylius\PdfGenerationBundle\Filesystem\Symfony;
 
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class SymfonyFilesystemPdfStorage implements PdfStorageInterface

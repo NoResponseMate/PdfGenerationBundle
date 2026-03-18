@@ -1,4 +1,4 @@
-# SyliusPdfBundle - Agent Guide
+# SyliusPdfGenerationBundle - Agent Guide
 
 A Symfony bundle providing context-aware PDF generation with swappable adapter backends.
 
@@ -100,24 +100,24 @@ When processing context `default`, only: ProcessorA, ProcessorB.
 
 ### DI Wiring
 
-**Extension phase** (`SyliusPdfExtension::load`):
+**Extension phase** (`SyliusPdfGenerationExtension::load`):
 - Processes config, loads `config/services.php` (core services)
 - For each context (default + named contexts):
-  - If adapter is built-in (`knp_snappy`, `dompdf`): loads adapter service file once, creates a `ChildDefinition` for the context, registers an options processor tagged `sylius_pdf.options_processor`
-  - If adapter is unknown: stores in `.sylius_pdf.deferred_adapter_contexts` parameter (dot-prefixed = internal, auto-removed by Symfony)
+  - If adapter is built-in (`knp_snappy`, `dompdf`): loads adapter service file once, creates a `ChildDefinition` for the context, registers an options processor tagged `sylius_pdf_generation.options_processor`
+  - If adapter is unknown: stores in `.sylius_pdf_generation.deferred_adapter_contexts` parameter (dot-prefixed = internal, auto-removed by Symfony)
 - Builds per-context `PdfStorageInterface` instances based on `storage` config (validates required classes for each storage type, throws `LogicException` with `composer require` hint); wires into `PdfFileManager`'s ServiceLocator
 - Wires the adapter references into `HtmlToPdfRenderer`'s ServiceLocator
 
 **Compiler passes** (in registration order):
 1. `RegisterKnpSnappyPrototypePass` - clones the `knp_snappy.pdf` definition as a non-shared prototype so the generator provider can create fresh instances per call
-2. `RegisterGeneratorProvidersPass` - collects `sylius_pdf.generator_provider` tagged services into the `GeneratorProviderRegistry`
-3. `RegisterOptionsProcessorsPass` - collects all `sylius_pdf.options_processor` tagged services, groups by adapter+context, sorts by priority, builds `CompositeOptionsProcessor` per adapter
-4. `RegisterPdfGenerationAdaptersPass` - resolves deferred (custom) adapters by matching `sylius_pdf.adapter` tags to context names, merges into the ServiceLocator
+2. `RegisterGeneratorProvidersPass` - collects `sylius_pdf_generation.generator_provider` tagged services into the `GeneratorProviderRegistry`
+3. `RegisterOptionsProcessorsPass` - collects all `sylius_pdf_generation.options_processor` tagged services, groups by adapter+context, sorts by priority, builds `CompositeOptionsProcessor` per adapter
+4. `RegisterPdfGenerationAdaptersPass` - resolves deferred (custom) adapters by matching `sylius_pdf_generation.adapter` tags to context names, merges into the ServiceLocator
 
 ## Configuration
 
 ```yaml
-sylius_pdf:
+sylius_pdf_generation:
     gotenberg:
         base_url: 'http://localhost:3000'  # Gotenberg server URL (default)
     default:
@@ -189,7 +189,7 @@ src/
       SymfonyFilesystemPdfStorage.php # Symfony Filesystem storage (optional)
     Gaufrette/
       GaufrettePdfStorage.php         # Gaufrette storage (optional)
-  Bridge/
+  Adapter/
     KnpSnappy/
       KnpSnappyAdapter.php           # wraps knplabs/knp-snappy-bundle
       KnpSnappyGeneratorProvider.php  # creates fresh Knp\Snappy\Pdf instances via prototype factory
@@ -207,8 +207,8 @@ src/
       RegisterOptionsProcessorsPass.php       # builds composite processors
       RegisterPdfGenerationAdaptersPass.php   # resolves custom adapters
     Configuration.php
-    SyliusPdfExtension.php
-  SyliusPdfBundle.php
+    SyliusPdfGenerationExtension.php
+  SyliusPdfGenerationBundle.php
 config/
   services.php                # core services (HtmlToPdfRenderer, TwigToPdfRenderer, manager, registry)
   adapter/knp_snappy.php      # KnpSnappy adapter + processor + provider (abstract)
@@ -224,8 +224,8 @@ For integrating a PDF library not bundled with this package.
 
 **Via attribute (recommended):**
 ```php
-use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
-use Sylius\PdfBundle\Core\Attribute\AsPdfGenerationAdapter;
+use Sylius\PdfGenerationBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfGenerationBundle\Core\Attribute\AsPdfGenerationAdapter;
 
 #[AsPdfGenerationAdapter('my_adapter')]
 final class MyAdapter implements PdfGenerationAdapterInterface
@@ -238,12 +238,12 @@ final class MyAdapter implements PdfGenerationAdapterInterface
 ```yaml
 App\Pdf\MyAdapter:
     tags:
-        - { name: 'sylius_pdf.adapter', key: 'my_adapter' }
+        - { name: 'sylius_pdf_generation.adapter', key: 'my_adapter' }
 ```
 
 Then reference in config:
 ```yaml
-sylius_pdf:
+sylius_pdf_generation:
     default:
         adapter: my_adapter
 ```
@@ -256,8 +256,8 @@ For modifying the underlying generator's configuration before PDF generation. Us
 
 **Via attribute:**
 ```php
-use Sylius\PdfBundle\Core\Attribute\AsPdfOptionsProcessor;
-use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
+use Sylius\PdfGenerationBundle\Core\Attribute\AsPdfOptionsProcessor;
+use Sylius\PdfGenerationBundle\Core\Processor\OptionsProcessorInterface;
 
 #[AsPdfOptionsProcessor(adapter: 'knp_snappy', context: 'invoice', priority: 10)]
 final class InvoiceOptionsProcessor implements OptionsProcessorInterface
@@ -274,7 +274,7 @@ final class InvoiceOptionsProcessor implements OptionsProcessorInterface
 ```yaml
 App\Pdf\InvoiceOptionsProcessor:
     tags:
-        - { name: 'sylius_pdf.options_processor', adapter: 'knp_snappy', context: 'invoice', priority: 10 }
+        - { name: 'sylius_pdf_generation.options_processor', adapter: 'knp_snappy', context: 'invoice', priority: 10 }
 ```
 
 Tag attributes:
@@ -288,8 +288,8 @@ For controlling how the underlying generator object is created or reused per con
 
 **Via attribute:**
 ```php
-use Sylius\PdfBundle\Core\Attribute\AsPdfGeneratorProvider;
-use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
+use Sylius\PdfGenerationBundle\Core\Attribute\AsPdfGeneratorProvider;
+use Sylius\PdfGenerationBundle\Core\Provider\GeneratorProviderInterface;
 
 #[AsPdfGeneratorProvider(adapter: 'knp_snappy', context: 'invoice')]
 final class InvoiceGeneratorProvider implements GeneratorProviderInterface
@@ -305,7 +305,7 @@ final class InvoiceGeneratorProvider implements GeneratorProviderInterface
 ```yaml
 App\Pdf\InvoiceGeneratorProvider:
     tags:
-        - { name: 'sylius_pdf.generator_provider', adapter: 'knp_snappy', context: 'invoice' }
+        - { name: 'sylius_pdf_generation.generator_provider', adapter: 'knp_snappy', context: 'invoice' }
 ```
 
 ### 4. Replacing Core Services
@@ -313,11 +313,11 @@ App\Pdf\InvoiceGeneratorProvider:
 All core services are aliased by interface. Override via Symfony's service decoration:
 
 ```yaml
-Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface:     # alias -> sylius_pdf.renderer.html
-Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface:     # alias -> sylius_pdf.renderer.twig
-Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface:  # alias -> sylius_pdf.manager
-Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface:   # alias -> sylius_pdf.adapter.default
-Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> sylius_pdf.registry.generator_provider
+Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRendererInterface:     # alias -> sylius_pdf_generation.renderer.html
+Sylius\PdfGenerationBundle\Core\Renderer\TwigToPdfRendererInterface:     # alias -> sylius_pdf_generation.renderer.twig
+Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManagerInterface:  # alias -> sylius_pdf_generation.manager
+Sylius\PdfGenerationBundle\Core\Adapter\PdfGenerationAdapterInterface:   # alias -> sylius_pdf_generation.adapter.default
+Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> sylius_pdf_generation.registry.generator_provider
 ```
 
 ## Built-in Adapters
@@ -338,7 +338,7 @@ Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface:  # alias -> s
 - Uses Gotenberg's Docker-based API with headless Chromium for HTML-to-PDF conversion
 - `GotenbergGeneratorProvider` creates a fresh `ChromiumPdf` builder per call, connecting to the Gotenberg server at the configured `base_url`
 - Adapter flow: gets `ChromiumPdf` builder → processes options → calls `$builder->html(Stream::string(...))` to build the request → sends via `Gotenberg::send()` → returns PDF bytes
-- Configure the Gotenberg server URL via `sylius_pdf.gotenberg.base_url` (defaults to `http://localhost:3000`)
+- Configure the Gotenberg server URL via `sylius_pdf_generation.gotenberg.base_url` (defaults to `http://localhost:3000`)
 
 All adapters are optional dependencies. Configuring an adapter whose package is not installed throws a `LogicException` with a `composer require` hint.
 

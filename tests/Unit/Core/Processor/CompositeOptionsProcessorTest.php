@@ -11,12 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Core\Processor;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Core\Processor;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
-use Sylius\PdfBundle\Core\Processor\OptionsProcessorInterface;
+use Sylius\PdfGenerationBundle\Core\Processor\CompositeOptionsProcessor;
+use Sylius\PdfGenerationBundle\Core\Processor\OptionsProcessorInterface;
 
 final class CompositeOptionsProcessorTest extends TestCase
 {

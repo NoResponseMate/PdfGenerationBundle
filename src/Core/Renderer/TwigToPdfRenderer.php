@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Renderer;
+namespace Sylius\PdfGenerationBundle\Core\Renderer;
 
 use Twig\Environment;
 

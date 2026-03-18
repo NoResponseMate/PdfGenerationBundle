@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Renderer;
+namespace Sylius\PdfGenerationBundle\Core\Renderer;
 
-use Sylius\PdfBundle\Core\Adapter\PdfGenerationAdapterInterface;
+use Sylius\PdfGenerationBundle\Core\Adapter\PdfGenerationAdapterInterface;
 use Symfony\Component\DependencyInjection\ServiceLocator;
 
 final class HtmlToPdfRenderer implements HtmlToPdfRendererInterface

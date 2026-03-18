@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Registry;
+namespace Sylius\PdfGenerationBundle\Core\Registry;
 
 interface GeneratorProviderRegistryInterface
 {

@@ -11,16 +11,16 @@
 
 declare(strict_types=1);
 
-use Sylius\PdfBundle\Core\Generator\PdfFileGenerator;
-use Sylius\PdfBundle\Core\Generator\PdfFileGeneratorInterface;
-use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManager;
-use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistryInterface;
-use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRenderer;
-use Sylius\PdfBundle\Core\Renderer\HtmlToPdfRendererInterface;
-use Sylius\PdfBundle\Core\Renderer\TwigToPdfRenderer;
-use Sylius\PdfBundle\Core\Renderer\TwigToPdfRendererInterface;
+use Sylius\PdfGenerationBundle\Core\Generator\PdfFileGenerator;
+use Sylius\PdfGenerationBundle\Core\Generator\PdfFileGeneratorInterface;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManager;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
+use Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistry;
+use Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistryInterface;
+use Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRenderer;
+use Sylius\PdfGenerationBundle\Core\Renderer\HtmlToPdfRendererInterface;
+use Sylius\PdfGenerationBundle\Core\Renderer\TwigToPdfRenderer;
+use Sylius\PdfGenerationBundle\Core\Renderer\TwigToPdfRendererInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\abstract_arg;
@@ -29,38 +29,38 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
 
-    $services->set('sylius_pdf.renderer.html', HtmlToPdfRenderer::class)
+    $services->set('sylius_pdf_generation.renderer.html', HtmlToPdfRenderer::class)
         ->args([
-            abstract_arg('adapter service locator, set by SyliusPdfExtension'),
+            abstract_arg('adapter service locator, set by SyliusPdfGenerationExtension'),
         ])
     ;
-    $services->alias(HtmlToPdfRendererInterface::class, 'sylius_pdf.renderer.html');
+    $services->alias(HtmlToPdfRendererInterface::class, 'sylius_pdf_generation.renderer.html');
 
-    $services->set('sylius_pdf.manager', PdfFileManager::class)
+    $services->set('sylius_pdf_generation.manager', PdfFileManager::class)
         ->args([
-            abstract_arg('storage service locator, set by SyliusPdfExtension'),
+            abstract_arg('storage service locator, set by SyliusPdfGenerationExtension'),
         ])
     ;
-    $services->alias(PdfFileManagerInterface::class, 'sylius_pdf.manager');
+    $services->alias(PdfFileManagerInterface::class, 'sylius_pdf_generation.manager');
 
-    $services->set('sylius_pdf.generator', PdfFileGenerator::class)
+    $services->set('sylius_pdf_generation.generator', PdfFileGenerator::class)
         ->args([
-            service('sylius_pdf.manager'),
+            service('sylius_pdf_generation.manager'),
         ])
     ;
-    $services->alias(PdfFileGeneratorInterface::class, 'sylius_pdf.generator');
+    $services->alias(PdfFileGeneratorInterface::class, 'sylius_pdf_generation.generator');
 
-    $services->set('sylius_pdf.registry.generator_provider', GeneratorProviderRegistry::class)
+    $services->set('sylius_pdf_generation.registry.generator_provider', GeneratorProviderRegistry::class)
         ->args([
             abstract_arg('provider service locator, set by RegisterGeneratorProvidersPass'),
         ])
     ;
-    $services->alias(GeneratorProviderRegistryInterface::class, 'sylius_pdf.registry.generator_provider');
+    $services->alias(GeneratorProviderRegistryInterface::class, 'sylius_pdf_generation.registry.generator_provider');
 
-    $services->set('sylius_pdf.renderer.twig', TwigToPdfRenderer::class)
+    $services->set('sylius_pdf_generation.renderer.twig', TwigToPdfRenderer::class)
         ->args([
             service('twig'),
-            service('sylius_pdf.renderer.html'),
+            service('sylius_pdf_generation.renderer.html'),
         ]);
-    $services->alias(TwigToPdfRendererInterface::class, 'sylius_pdf.renderer.twig');
+    $services->alias(TwigToPdfRendererInterface::class, 'sylius_pdf_generation.renderer.twig');
 };

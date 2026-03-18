@@ -11,14 +11,14 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Unit\Filesystem\Gaufrette;
+namespace Tests\Sylius\PdfGenerationBundle\Unit\Filesystem\Gaufrette;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
-use Sylius\PdfBundle\Filesystem\Gaufrette\GaufrettePdfStorage;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Filesystem\Gaufrette\GaufrettePdfStorage;
 use Symfony\Component\Filesystem\Filesystem;
 
 final class GaufrettePdfStorageTest extends TestCase

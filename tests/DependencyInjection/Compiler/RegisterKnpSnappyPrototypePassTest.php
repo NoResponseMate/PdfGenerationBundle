@@ -11,12 +11,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use Knp\Snappy\GeneratorInterface;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterKnpSnappyPrototypePass;
+use Sylius\PdfGenerationBundle\DependencyInjection\Compiler\RegisterKnpSnappyPrototypePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 

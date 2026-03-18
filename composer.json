@@ -1,7 +1,11 @@
 {
-    "name": "sylius/pdf-bundle",
+    "name": "sylius/pdf-generation-bundle",
     "type": "symfony-bundle",
     "description": "PDF generation bundle with swappable renderer abstraction.",
+    "keywords": [
+        "pdf",
+        "symfony"
+    ],
     "license": "MIT",
     "require": {
         "php": ">=8.2",
@@ -45,13 +49,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Sylius\\PdfBundle\\": "src/"
+            "Sylius\\PdfGenerationBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Sylius\\PdfBundle\\": "tests/",
-            "Tests\\Sylius\\PdfBundle\\Application\\": "tests/Application/src"
+            "Tests\\Sylius\\PdfGenerationBundle\\": "tests/",
+            "Tests\\Sylius\\PdfGenerationBundle\\Application\\": "tests/Application/src"
         }
     },
     "prefer-stable": true

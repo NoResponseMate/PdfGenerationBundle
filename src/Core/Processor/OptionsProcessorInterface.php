@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Processor;
+namespace Sylius\PdfGenerationBundle\Core\Processor;
 
 interface OptionsProcessorInterface
 {

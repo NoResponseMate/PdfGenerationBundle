@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Tests\Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Sylius\PdfBundle\Core\Provider\GeneratorProviderInterface;
-use Sylius\PdfBundle\Core\Registry\GeneratorProviderRegistry;
-use Sylius\PdfBundle\DependencyInjection\Compiler\RegisterGeneratorProvidersPass;
+use Sylius\PdfGenerationBundle\Core\Provider\GeneratorProviderInterface;
+use Sylius\PdfGenerationBundle\Core\Registry\GeneratorProviderRegistry;
+use Sylius\PdfGenerationBundle\DependencyInjection\Compiler\RegisterGeneratorProvidersPass;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -33,7 +33,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
 
         $pass->process($container);
 
-        self::assertFalse($container->hasDefinition('sylius_pdf.registry.generator_provider'));
+        self::assertFalse($container->hasDefinition('sylius_pdf_generation.registry.generator_provider'));
     }
 
     #[Test]
@@ -41,7 +41,7 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
-        $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
+        $container->setDefinition('sylius_pdf_generation.registry.generator_provider', $registryDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
         $pass->process($container);
@@ -54,10 +54,10 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
-        $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
+        $container->setDefinition('sylius_pdf_generation.registry.generator_provider', $registryDefinition);
 
         $providerDefinition = new Definition(GeneratorProviderInterface::class);
-        $providerDefinition->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf']);
+        $providerDefinition->addTag('sylius_pdf_generation.generator_provider', ['adapter' => 'dompdf']);
         $container->setDefinition('app.my_provider', $providerDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
@@ -77,10 +77,10 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
-        $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
+        $container->setDefinition('sylius_pdf_generation.registry.generator_provider', $registryDefinition);
 
         $providerDefinition = new Definition(GeneratorProviderInterface::class);
-        $providerDefinition->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf', 'context' => 'invoice']);
+        $providerDefinition->addTag('sylius_pdf_generation.generator_provider', ['adapter' => 'dompdf', 'context' => 'invoice']);
         $container->setDefinition('app.my_provider', $providerDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
@@ -98,16 +98,16 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
-        $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
+        $container->setDefinition('sylius_pdf_generation.registry.generator_provider', $registryDefinition);
 
         $providerDefinition = new Definition(GeneratorProviderInterface::class);
-        $providerDefinition->addTag('sylius_pdf.generator_provider', []);
+        $providerDefinition->addTag('sylius_pdf_generation.generator_provider', []);
         $container->setDefinition('app.my_provider', $providerDefinition);
 
         $pass = new RegisterGeneratorProvidersPass();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('The service "app.my_provider" tagged with "sylius_pdf.generator_provider" must have an "adapter" attribute.');
+        $this->expectExceptionMessage('The service "app.my_provider" tagged with "sylius_pdf_generation.generator_provider" must have an "adapter" attribute.');
 
         $pass->process($container);
     }
@@ -117,14 +117,14 @@ final class RegisterGeneratorProvidersPassTest extends TestCase
     {
         $container = new ContainerBuilder();
         $registryDefinition = new Definition(GeneratorProviderRegistry::class);
-        $container->setDefinition('sylius_pdf.registry.generator_provider', $registryDefinition);
+        $container->setDefinition('sylius_pdf_generation.registry.generator_provider', $registryDefinition);
 
         $provider1 = new Definition(GeneratorProviderInterface::class);
-        $provider1->addTag('sylius_pdf.generator_provider', ['adapter' => 'dompdf']);
+        $provider1->addTag('sylius_pdf_generation.generator_provider', ['adapter' => 'dompdf']);
         $container->setDefinition('app.provider1', $provider1);
 
         $provider2 = new Definition(GeneratorProviderInterface::class);
-        $provider2->addTag('sylius_pdf.generator_provider', ['adapter' => 'knp_snappy']);
+        $provider2->addTag('sylius_pdf_generation.generator_provider', ['adapter' => 'knp_snappy']);
         $container->setDefinition('app.provider2', $provider2);
 
         $pass = new RegisterGeneratorProvidersPass();

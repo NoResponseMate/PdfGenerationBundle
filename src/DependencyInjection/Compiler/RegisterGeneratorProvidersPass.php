@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -22,11 +22,11 @@ final class RegisterGeneratorProvidersPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition('sylius_pdf.registry.generator_provider')) {
+        if (!$container->hasDefinition('sylius_pdf_generation.registry.generator_provider')) {
             return;
         }
 
-        $taggedServices = $container->findTaggedServiceIds('sylius_pdf.generator_provider');
+        $taggedServices = $container->findTaggedServiceIds('sylius_pdf_generation.generator_provider');
 
         if ([] === $taggedServices) {
             return;
@@ -39,7 +39,7 @@ final class RegisterGeneratorProvidersPass implements CompilerPassInterface
             foreach ($tags as $attributes) {
                 if (!isset($attributes['adapter']) || !is_string($attributes['adapter']) || '' === $attributes['adapter']) {
                     throw new \InvalidArgumentException(sprintf(
-                        'The service "%s" tagged with "sylius_pdf.generator_provider" must have an "adapter" attribute.',
+                        'The service "%s" tagged with "sylius_pdf_generation.generator_provider" must have an "adapter" attribute.',
                         $serviceId,
                     ));
                 }
@@ -54,7 +54,7 @@ final class RegisterGeneratorProvidersPass implements CompilerPassInterface
             }
         }
 
-        $registryDefinition = $container->getDefinition('sylius_pdf.registry.generator_provider');
+        $registryDefinition = $container->getDefinition('sylius_pdf_generation.registry.generator_provider');
         $registryDefinition->setArgument(0, new ServiceLocatorArgument($locatorMap));
     }
 }

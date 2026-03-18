@@ -11,11 +11,11 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Filesystem\Manager;
+namespace Sylius\PdfGenerationBundle\Core\Filesystem\Manager;
 
 use Psr\Container\ContainerInterface;
-use Sylius\PdfBundle\Core\Filesystem\Storage\PdfStorageInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Storage\PdfStorageInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 
 final class PdfFileManager implements PdfFileManagerInterface
 {

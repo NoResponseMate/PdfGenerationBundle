@@ -11,9 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\DependencyInjection\Compiler;
+namespace Sylius\PdfGenerationBundle\DependencyInjection\Compiler;
 
-use Sylius\PdfBundle\Core\Processor\CompositeOptionsProcessor;
+use Sylius\PdfGenerationBundle\Core\Processor\CompositeOptionsProcessor;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -23,7 +23,7 @@ final class RegisterOptionsProcessorsPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        $taggedServices = $container->findTaggedServiceIds('sylius_pdf.options_processor');
+        $taggedServices = $container->findTaggedServiceIds('sylius_pdf_generation.options_processor');
 
         if ([] === $taggedServices) {
             return;
@@ -36,7 +36,7 @@ final class RegisterOptionsProcessorsPass implements CompilerPassInterface
             foreach ($tags as $attributes) {
                 if (!isset($attributes['adapter']) || !is_string($attributes['adapter']) || '' === $attributes['adapter']) {
                     throw new \InvalidArgumentException(sprintf(
-                        'The service "%s" tagged with "sylius_pdf.options_processor" must have an "adapter" attribute.',
+                        'The service "%s" tagged with "sylius_pdf_generation.options_processor" must have an "adapter" attribute.',
                         $serviceId,
                     ));
                 }
@@ -55,7 +55,7 @@ final class RegisterOptionsProcessorsPass implements CompilerPassInterface
         }
 
         foreach ($grouped as $adapterType => $contexts) {
-            $compositeId = sprintf('sylius_pdf.options_processor.composite.%s', $adapterType);
+            $compositeId = sprintf('sylius_pdf_generation.options_processor.composite.%s', $adapterType);
 
             /** @var array<string, list<Reference>> $contextReferences */
             $contextReferences = [];

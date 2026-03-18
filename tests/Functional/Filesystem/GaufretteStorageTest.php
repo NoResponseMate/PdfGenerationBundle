@@ -11,13 +11,13 @@
 
 declare(strict_types=1);
 
-namespace Tests\Sylius\PdfBundle\Functional\Filesystem;
+namespace Tests\Sylius\PdfGenerationBundle\Functional\Filesystem;
 
 use PHPUnit\Framework\Attributes\Test;
-use Sylius\PdfBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
-use Sylius\PdfBundle\Core\Model\PdfFile;
+use Sylius\PdfGenerationBundle\Core\Filesystem\Manager\PdfFileManagerInterface;
+use Sylius\PdfGenerationBundle\Core\Model\PdfFile;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Tests\Sylius\PdfBundle\Application\Kernel;
+use Tests\Sylius\PdfGenerationBundle\Application\Kernel;
 
 final class GaufretteStorageTest extends KernelTestCase
 {
@@ -192,7 +192,7 @@ final class GaufretteStorageTest extends KernelTestCase
 
     private function getManager(): PdfFileManagerInterface
     {
-        $manager = self::getContainer()->get('test.sylius_pdf.manager');
+        $manager = self::getContainer()->get('test.sylius_pdf_generation.manager');
         self::assertInstanceOf(PdfFileManagerInterface::class, $manager);
 
         return $manager;

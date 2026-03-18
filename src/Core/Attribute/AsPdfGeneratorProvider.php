@@ -11,7 +11,7 @@
 
 declare(strict_types=1);
 
-namespace Sylius\PdfBundle\Core\Attribute;
+namespace Sylius\PdfGenerationBundle\Core\Attribute;
 
 #[\Attribute(\Attribute::TARGET_CLASS)]
 final readonly class AsPdfGeneratorProvider
