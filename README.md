@@ -24,6 +24,14 @@ This bundle decouples PDF rendering from application-specific logic by providing
 | `dompdf`     | [dompdf/dompdf](https://github.com/dompdf/dompdf)                       | Nothing (pure PHP)          |
 | `gotenberg`  | [gotenberg/gotenberg-php](https://github.com/gotenberg/gotenberg-php)   | Running Gotenberg container |
 
+**Supported storage backends:**
+
+| Storage type | Library                                                                       | Requires                          |
+|--------------|-------------------------------------------------------------------------------|-----------------------------------|
+| `filesystem` | [symfony/filesystem](https://github.com/symfony/filesystem)                   | Nothing (included by default)     |
+| `flysystem`  | [league/flysystem-bundle](https://github.com/thephpleague/flysystem-bundle)   | A configured Flysystem filesystem |
+| `gaufrette`  | [knplabs/knp-gaufrette-bundle](https://github.com/KnpLabs/KnpGaufretteBundle) | A configured Gaufrette filesystem |
+
 ## Installation
 
 ```bash
@@ -80,7 +88,7 @@ sylius_pdf_generation:
 | `default`                       | Configuration for the default context (used when no context is specified).                                   |
 | `contexts`                      | Named contexts, each with its own adapter and optional storage override.                                     |
 | `adapter`                       | Adapter name: `knp_snappy`, `dompdf`, `gotenberg`, or a custom adapter key.                                  |
-| `gotenberg.base_url`            | URL of the Gotenberg server (default: `http://localhost:3000`). Required when using the `gotenberg` adapter. |
+| `gotenberg.base_url`            | URL of the Gotenberg server (default: `http://localhost:3000`).                                              |
 | `storage.type`                  | Storage backend: `filesystem` (default), `flysystem`, or `gaufrette`.                                        |
 | `storage.filesystem`            | Flysystem/Gaufrette filesystem service ID (e.g. `default.storage`).                                          |
 | `storage.prefix`                | Path prefix for Flysystem/Gaufrette storage.                                                                 |
@@ -242,7 +250,7 @@ services:
             - { name: 'sylius_pdf_generation.generator_provider', adapter: 'dompdf', context: 'invoice' }
 ```
 
-The `key` must match the adapter name. The optional `context` scopes the provider to a specific context; without it, the provider is used as the default for that adapter.
+The `adapter` must match the adapter name. The optional `context` scopes the provider to a specific context; without it, the provider is used as the default for that adapter.
 
 ### Custom options processors
 
