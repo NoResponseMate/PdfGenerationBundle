@@ -80,8 +80,8 @@ TwigToPdfRenderer
 PdfFileManager (context-aware)
   -> ServiceLocator keyed by context name
        -> PdfStorageInterface instance per context
-            FlysystemPdfStorage    (league/flysystem-bundle — default, hard dep)
-            SymfonyFilesystemPdfStorage  (symfony/filesystem — hard dep)
+            FlysystemPdfStorage    (league/flysystem-bundle — optional)
+            SymfonyFilesystemPdfStorage  (symfony/filesystem — default, hard dep)
             GaufrettePdfStorage    (knp-gaufrette-bundle — optional)
 ```
 
@@ -344,8 +344,8 @@ All adapters are optional dependencies. Configuring an adapter whose package is 
 
 ## Built-in Storage Backends
 
-### Flysystem (`flysystem`) — default
-- Requires: `league/flysystem-bundle` ^3.0 (hard dependency)
+### Flysystem (`flysystem`)
+- Requires: `league/flysystem-bundle` ^3.0 (optional)
 - Constructor: `FilesystemOperator $filesystem, LocalFilesystem $localFilesystem, string $prefix = '', ?string $localCacheDirectory = null`
 - Paths use `/` separator (Flysystem normalizes), sets `storagePath` on saved/retrieved files
 - `resolveLocalPath()` requires `local_cache_directory` config; lazily fetches and caches locally, invalidates on save/remove

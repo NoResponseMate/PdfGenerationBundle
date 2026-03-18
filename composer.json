@@ -9,7 +9,6 @@
     "license": "MIT",
     "require": {
         "php": ">=8.2",
-        "league/flysystem-bundle": "^3.0",
         "symfony/config": "^6.4 || ^7.4 || ^8.0",
         "symfony/dependency-injection": "^6.4 || ^7.4 || ^8.0",
         "symfony/filesystem": "^6.4 || ^7.4 || ^8.0",
@@ -20,6 +19,7 @@
     "require-dev": {
         "ext-curl": "*",
         "dompdf/dompdf": "^3.1",
+        "league/flysystem-bundle": "^3.0",
         "gotenberg/gotenberg-php": "^2.17",
         "knplabs/knp-gaufrette-bundle": "^0.9.0",
         "knplabs/knp-snappy-bundle": "^1.10",
@@ -36,6 +36,7 @@
     },
     "suggest": {
         "dompdf/dompdf": "Required for the Dompdf adapter",
+        "league/flysystem-bundle": "Required for the Flysystem storage type",
         "knplabs/knp-gaufrette-bundle": "Required for the Gaufrette storage type",
         "knplabs/knp-snappy-bundle": "Required for the KnpSnappy adapter (wkhtmltopdf)"
     },

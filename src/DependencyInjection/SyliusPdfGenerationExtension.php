@@ -40,6 +40,7 @@ final class SyliusPdfGenerationExtension extends Extension
     ];
 
     private const STORAGE_REQUIRED = [
+        'flysystem' => ['class' => 'League\Flysystem\Filesystem', 'package' => 'league/flysystem-bundle'],
         'gaufrette' => ['class' => 'Gaufrette\Filesystem', 'package' => 'knplabs/knp-gaufrette-bundle'],
     ];
 
